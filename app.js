@@ -1,5 +1,6 @@
 (() => {
-  const $, $$ = (sel, ctx = document) => [ctx.querySelector(sel), ctx.querySelectorAll(sel)];
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx = document) => ctx.querySelectorAll(sel);
 
   const state = {
     originalImage: null,
