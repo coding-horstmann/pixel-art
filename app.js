@@ -54,6 +54,33 @@
 
   function initFooterYear() { setText('year', new Date().getFullYear().toString()); }
 
+  // Global drawToPreview function
+  async function drawToPreview(bitmap) {
+    const canvas = state.previewCanvas;
+    const ctx = state.previewCtx;
+    const overlay = document.getElementById('processingOverlay');
+    overlay?.classList.add('is-active');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!bitmap) {
+      overlay?.classList.remove('is-active');
+      return;
+    }
+    // Process via Pixelate module
+    const result = window.Pixelate.processToPreview(bitmap, {
+      gridSize: state.pixelResolution,
+      paletteSize: state.paletteSize,
+      dithering: state.dithering,
+      outWidth: canvas.width,
+      outHeight: canvas.height,
+      crop: state.crop && !state.crop.active && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
+    });
+    ctx.putImageData(result, 0, 0);
+    // Push to history as data URL for undo
+    state.history.push(canvas.toDataURL());
+    if (state.history.length > 20) state.history.shift();
+    overlay?.classList.remove('is-active');
+  }
+
   function initUpload() {
     const dropzone = $('#dropzone');
     const fileInput = $('#fileInput');
@@ -89,7 +116,10 @@
     browseBtn?.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files?.[0];
-      if (file) await handleFile(file);
+      if (file) {
+        await handleFile(file);
+        fileInput.value = ''; // Reset input to allow same file again
+      }
     });
 
     async function handleFile(file) {
@@ -141,28 +171,6 @@
       }
     }
 
-    async function drawToPreview(bitmap) {
-      const canvas = state.previewCanvas;
-      const ctx = state.previewCtx;
-      const overlay = document.getElementById('processingOverlay');
-      overlay?.classList.add('is-active');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (!bitmap) return;
-      // Process via Pixelate module
-      const result = window.Pixelate.processToPreview(bitmap, {
-        gridSize: state.pixelResolution,
-        paletteSize: state.paletteSize,
-        dithering: state.dithering,
-        outWidth: canvas.width,
-        outHeight: canvas.height,
-        crop: state.crop && !state.crop.active && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
-      });
-      ctx.drawImage(result.canvas, 0, 0);
-      // Push to history as data URL for undo
-      state.history.push(canvas.toDataURL());
-      if (state.history.length > 20) state.history.shift();
-      overlay?.classList.remove('is-active');
-    }
 
     function populateSizeDropdown() {
       const sizes = [
