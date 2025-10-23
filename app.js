@@ -74,7 +74,7 @@
       outHeight: canvas.height,
       crop: state.crop && !state.crop.active && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
     });
-    ctx.putImageData(result, 0, 0);
+    ctx.drawImage(result.canvas, 0, 0);
     // Push to history as data URL for undo
     state.history.push(canvas.toDataURL());
     if (state.history.length > 20) state.history.shift();
