@@ -55,10 +55,10 @@
   function initFooterYear() { setText('year', new Date().getFullYear().toString()); }
 
   function initUpload() {
-    const [dropzone] = $('#dropzone');
-    const [fileInput] = $('#fileInput');
-    const [browseBtn] = [document.getElementById('uploadBtn')];
-    const [uploadError] = $('#uploadError');
+    const dropzone = $('#dropzone');
+    const fileInput = $('#fileInput');
+    const browseBtn = document.getElementById('uploadBtn');
+    const uploadError = $('#uploadError');
     const sizeSelect = document.getElementById('sizeSelect');
     const sizePrice = document.getElementById('sizePrice');
     const sizeOrientation = document.getElementById('sizeOrientation');
