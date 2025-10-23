@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Poster | Transform Your Photos Into Epic Pixel Art Posters!</title>
+    <meta name="description" content="Upload an image, customize pixel art settings, and order a stunning poster. No image storage. Free shipping. PayPal checkout.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="shortcut icon" href="./favicon.ico">
+    <link rel="icon" href="./favicon.ico" sizes="16x16" type="image/x-icon">
+    <link rel="icon" href="./favicon.ico" sizes="32x32" type="image/x-icon">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Victor+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <span class="logo-pixel" aria-hidden="true">▦</span>
+                <h1 class="brand-title">Pixel-Poster</h1>
+            </div>
+            <nav class="site-nav" aria-label="Primary">
+                <a href="#upload" class="nav-link">Pixel Art Generator</a>
+                <a href="#inspiration" class="nav-link">Inspiration</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+            </nav>
+            <button id="cartBtn" class="btn btn-ghost cart-btn" type="button" aria-label="Warenkorb öffnen">
+                🛒 <span id="cartCount" class="cart-count">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- Hero -->
+        <section id="hero" class="section hero-section">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <h2 class="headline">Transform Your Photos Into Epic Pixel Art Posters!</h2>
+                    <p class="subtext">Upload any image, customize pixel resolution, colors, and dithering — then order a museum-grade print. No account, no storage, free shipping.</p>
+                    <div class="cta-row">
+                        <a href="#upload" class="btn btn-primary">Start Creating</a>
+                        <a href="#features" class="btn btn-ghost">Learn More</a>
+                    </div>
+                </div>
+                <div class="hero-visual" aria-hidden="true">
+                    <canvas id="hero-canvas" class="hero-canvas" width="480" height="320"></canvas>
+                    <div class="pixel-glow"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="section features-section">
+            <div class="container features-grid">
+                <div class="feature">
+                    <div class="feature-icon" aria-hidden="true">⬛</div>
+                    <h3 class="feature-title">Easy Upload</h3>
+                    <p class="feature-text">Drag & drop JPEG/PNG up to 50MB. All processing is done in your browser.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon" aria-hidden="true">🎛️</div>
+                    <h3 class="feature-title">Deep Customization</h3>
+                    <p class="feature-text">Choose pixel resolution, color palette (4-64), and dithering styles with live preview.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon" aria-hidden="true">🖨️</div>
+                    <h3 class="feature-title">Premium Prints</h3>
+                    <p class="feature-text">High-resolution export optimized for large-format printing. Free worldwide shipping.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon" aria-hidden="true">🛡️</div>
+                    <h3 class="feature-title">Privacy First</h3>
+                    <p class="feature-text">We never store your images. Everything disappears when you close the page.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upload & Customize -->
+        <section id="upload" class="section upload-section">
+            <div class="container upload-grid">
+                <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Upload image by drag and drop or using the file picker">
+                    <input type="file" id="fileInput" accept="image/png,image/jpeg" aria-label="Choose image" hidden>
+                    <div class="dropzone-inner">
+                        <div class="drop-icon" aria-hidden="true">⬆</div>
+                        <p class="drop-title">Drag & Drop Your Image</p>
+                        <p class="drop-sub">PNG/JPEG, max 50MB</p>
+                        <div class="cta-row">
+                            <button class="btn btn-primary btn-upload" id="uploadBtn" type="button">Bild auswählen</button>
+                        </div>
+                        <p class="drop-hint">Tip: Use a high-quality source for best print results.</p>
+                        <p class="drop-error" id="uploadError" role="alert" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <div id="previewCard" class="preview-card is-hidden" aria-live="polite">
+                    <div class="canvas-wrap">
+                        <canvas id="previewCanvas" class="preview-canvas" width="640" height="640" aria-label="Pixel art preview"></canvas>
+                        <div id="processingOverlay" class="processing-overlay" aria-hidden="true" role="status" aria-live="polite">
+                            <div class="pixel-spinner" aria-hidden="true"></div>
+                            <span class="processing-text">Processing…</span>
+                        </div>
+                        <div id="cropOverlay" class="crop-overlay is-hidden" aria-hidden="true">
+                            <div class="crop-mask"></div>
+                            <div class="crop-toolbar">
+                                <button id="cropCancel" type="button" class="btn btn-ghost btn-util">Abbrechen</button>
+                                <button id="cropApply" type="button" class="btn btn-primary btn-util">Ausschnitt übernehmen</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="controls is-hidden" id="controlsPanel">
+                        <div class="control-group">
+                            <label for="pixelResolution">Pixel Resolution</label>
+                            <input id="pixelResolution" type="range" min="8" max="128" step="8" value="32">
+                            <div class="control-meta"><span id="pixelResolutionValue">32</span> px grid</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="paletteSize">Color Palette</label>
+                            <select id="paletteSize">
+                                <option value="4">4 colors (Game Boy)</option>
+                                <option value="8">8 colors (NES)</option>
+                                <option value="16" selected>16 colors (SNES)</option>
+                                <option value="32">32 colors</option>
+                                <option value="64">64 colors</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="dithering">Dithering</label>
+                            <select id="dithering">
+                                <option value="none" selected>None</option>
+                                <option value="floyd">Floyd–Steinberg</option>
+                                <option value="bayer">Ordered (Bayer)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="sizeSelect">Postergröße</label>
+                            <select id="sizeSelect" disabled>
+                                <option>Bitte zuerst ein Bild hochladen</option>
+                            </select>
+                            <div class="control-meta">Preis: <strong id="sizePrice">€0.00</strong> · <span id="sizeOrientation">—</span></div>
+                        </div>
+                        <div class="control-row">
+                            <button id="resetBtn" type="button" class="btn btn-ghost btn-util">Reset</button>
+                            <button id="undoBtn" type="button" class="btn btn-secondary btn-util">Undo</button>
+                            <button id="exportBtn" type="button" class="btn btn-primary btn-util">Export High-Res</button>
+                        </div>
+                        <div class="control-row">
+                            <button id="addToCartBtn" type="button" class="btn btn-secondary btn-purchase">In den Warenkorb</button>
+                            <button id="buyNowBtn" type="button" class="btn btn-primary btn-purchase">Direkt kaufen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Checkout -->
+    <div id="checkoutModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+        <div class="modal-backdrop" data-close-modal></div>
+        <div class="modal-dialog" role="document">
+            <button class="modal-close" type="button" aria-label="Schließen" data-close-modal>✕</button>
+            <h3 id="checkoutTitle" class="section-title">Checkout</h3>
+            <div class="order-brief">
+                <div><span class="muted">Größe</span> <strong id="modalSize">—</strong></div>
+                <div><span class="muted">Ausrichtung</span> <strong id="modalOrientation">—</strong></div>
+                <div><span class="muted">Preis</span> <strong id="modalPrice">€0.00</strong></div>
+            </div>
+            <form id="modalForm" class="modal-form" novalidate>
+                <div class="form-grid">
+                    <div class="form-row">
+                        <label for="mVorname">Vorname*</label>
+                        <input id="mVorname" name="vorname" type="text" required autocomplete="given-name">
+                    </div>
+                    <div class="form-row">
+                        <label for="mNachname">Nachname*</label>
+                        <input id="mNachname" name="nachname" type="text" required autocomplete="family-name">
+                    </div>
+                    <div class="form-row">
+                        <label for="mEmail">E-Mail*</label>
+                        <input id="mEmail" name="email" type="email" required autocomplete="email">
+                    </div>
+                    <div class="form-row">
+                        <label for="mTelefon">Telefon</label>
+                        <input id="mTelefon" name="telefon" type="tel" autocomplete="tel">
+                    </div>
+                    <div class="form-row">
+                        <label for="mStrasse">Straße*</label>
+                        <input id="mStrasse" name="strasse" type="text" required autocomplete="address-line1">
+                    </div>
+                    <div class="form-row">
+                        <label for="mHausnummer">Hausnummer*</label>
+                        <input id="mHausnummer" name="hausnummer" type="text" required autocomplete="address-line2">
+                    </div>
+                    <div class="form-row">
+                        <label for="mPlz">PLZ*</label>
+                        <input id="mPlz" name="plz" type="text" required autocomplete="postal-code">
+                    </div>
+                    <div class="form-row">
+                        <label for="mOrt">Ort*</label>
+                        <input id="mOrt" name="ort" type="text" required autocomplete="address-level2">
+                    </div>
+                    <div class="form-row">
+                        <label for="mLand">Land</label>
+                        <input id="mLand" name="land" type="text" value="Deutschland" disabled>
+                    </div>
+                </div>
+                <div id="paypal-button-container" class="paypal-container" aria-live="polite"></div>
+                <div id="formError" class="form-error" role="alert" aria-live="polite"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SEO Texts & FAQ -->
+    <section id="seo" class="section">
+        <div class="container">
+            <h3 class="section-title">Pixel-Poster kaufen: Eigene Fotos als Pixelkunst</h3>
+            <p>
+                Bei Pixel-Poster verwandelst du deine Lieblingsfotos direkt im Browser in beeindruckende Pixelkunst – ohne App, ohne Nutzerkonto und ohne Bildspeicherung.
+                Wähle Rastergröße, Farbpalette und Dithering, um den typischen Retro-Look zu kreieren, und bestelle dein Poster in verschiedenen Formaten.
+                Alle Bilder werden ausschließlich lokal verarbeitet und nach dem Schließen der Seite verworfen.
+            </p>
+            <p>
+                Für hochwertige Drucke exportierst du dein Motiv in hoher Auflösung. Unsere Drucke sind für große Formate optimiert und kommen mit kostenlosem Versand.
+                Die Bezahlung erfolgt sicher über PayPal. Probiere es jetzt aus und erlebe den Charme klassischer Konsolen-Grafik auf echter Leinwand.
+            </p>
+        </div>
+    </section>
+
+    <!-- Payment methods strip -->
+    <section id="payments" class="section payments-strip">
+        <div class="container payments-row" aria-label="Zahlungsmöglichkeiten">
+            <img src="./assets/payments/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
+            <img src="./assets/payments/amex.svg" alt="American Express" class="pay-icon" loading="lazy">
+            <img src="./assets/payments/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
+            <img src="./assets/payments/visa.svg" alt="Visa" class="pay-icon" loading="lazy">
+        </div>
+    </section>
+
+    <!-- Inspiration Gallery -->
+    <section id="inspiration" class="section inspiration-section">
+        <div class="container">
+            <h3 class="section-title">Inspiration</h3>
+            <p class="subtext">Lass dich von diesen Pixel‑Motiven inspirieren. Jedes Bild ist ein Demo‑Render – probiere deine eigenen Fotos aus!</p>
+            <div class="inspo-grid">
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 1"></canvas>
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 2"></canvas>
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 3"></canvas>
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 4"></canvas>
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 5"></canvas>
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 6"></canvas>
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 7"></canvas>
+                <canvas class="inspo-card" width="320" height="320" aria-label="Pixel Inspiration 8"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="section">
+        <div class="container">
+            <h3 class="section-title">FAQ – Häufige Fragen</h3>
+            <div class="faq">
+                <details>
+                    <summary>Werden meine Bilder gespeichert?</summary>
+                    <div>Nein. Die gesamte Verarbeitung findet clientseitig statt. Deine Bilder verlassen deinen Browser nicht.</div>
+                </details>
+                <details>
+                    <summary>Welche Dateiformate kann ich hochladen?</summary>
+                    <div>Unterstützt werden PNG und JPEG (bis 50MB).</div>
+                </details>
+                <details>
+                    <summary>Welche Größen gibt es und was kosten sie?</summary>
+                    <div>Du kannst zwischen mehreren Formaten von 21×29,7 cm bis A0 wählen. Die Preise werden direkt an der Größenwahl angezeigt.</div>
+                </details>
+                <details>
+                    <summary>Wie erfolgt die Bezahlung?</summary>
+                    <div>Per PayPal. Nach Eingabe deiner Daten im Checkout-Dialog wirst du zu PayPal geleitet.</div>
+                </details>
+                <details>
+                    <summary>Wie lange dauert der Versand?</summary>
+                    <div>Der Druck startet nach Zahlungseingang. Mit Zustellung kannst du in der Regel innerhalb weniger Werktage rechnen.</div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="foot-brand">
+                <span class="logo-pixel" aria-hidden="true">▦</span>
+                <span class="brand-title">Pixel-Poster</span>
+            </div>
+            <div class="foot-links">
+                <a href="#faq" class="foot-link">FAQ</a>
+                <a href="#upload" class="foot-link">Pixel Art Generator</a>
+                <a href="./agb.html" class="foot-link">AGB</a>
+                <a href="./datenschutz.html" class="foot-link">Datenschutz</a>
+                <a href="./impressum.html" class="foot-link">Impressum</a>
+                <a href="./widerruf.html" class="foot-link">Widerrufsrecht</a>
+            </div>
+            <div class="footer-payments" aria-label="Zahlungsmöglichkeiten">
+                <img src="./assets/payments/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
+                <img src="./assets/payments/amex.svg" alt="American Express" class="pay-icon" loading="lazy">
+                <img src="./assets/payments/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
+                <img src="./assets/payments/visa.svg" alt="Visa" class="pay-icon" loading="lazy">
+            </div>
+            <div class="foot-copy">© <span id="year"></span> Pixel-Poster. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- PayPal SDK: replace YOUR_CLIENT_ID before production -->
+    <script id="paypal-sdk" src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=EUR" data-sdk-integration-source="button-factory" defer></script>
+
+    <!-- Scripts -->
+    <script src="./pixelate.js" defer></script>
+    <script src="./app.js" defer></script>
+    <script src="./paypal.js" defer></script>
+</body>
+</html>
+
+
