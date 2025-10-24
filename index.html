@@ -110,9 +110,15 @@
                         </div>
                         <div id="cropOverlay" class="crop-overlay is-hidden" aria-hidden="true">
                             <div class="crop-mask"></div>
+                            <div class="crop-frame">
+                                <div class="crop-label">📐 5:7 Posterformat</div>
+                            </div>
                             <div class="crop-toolbar">
-                                <button id="cropCancel" type="button" class="btn btn-ghost btn-util">Abbrechen</button>
-                                <button id="cropApply" type="button" class="btn btn-primary btn-util">Ausschnitt übernehmen</button>
+                                <div class="crop-hint">🖱️ Ziehen = Position · Mausrad = Zoom</div>
+                                <div class="crop-buttons">
+                                    <button id="cropCancel" type="button" class="btn btn-ghost btn-util">Abbrechen</button>
+                                    <button id="cropApply" type="button" class="btn btn-primary btn-util">✓ Übernehmen</button>
+                                </div>
                             </div>
                         </div>
                     </div>

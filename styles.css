@@ -172,12 +172,108 @@ body::after {
 .pixel-spinner { width: 18px; height: 18px; background: var(--color-primary); box-shadow: 0 0 12px rgba(0,255,255,.8); animation: pixel-spin 1s steps(8) infinite; image-rendering: pixelated; }
 .processing-text { font-family: "Press Start 2P"; font-size: 12px; letter-spacing: 1px; }
 
-.crop-overlay { position: absolute; inset: 8px; display: none; }
+.crop-overlay { position: absolute; inset: 8px; display: none; cursor: move; }
 .crop-overlay.is-hidden { display: none; }
 .crop-overlay.active { display: block; }
-.crop-mask { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
-.crop-overlay::after { /* 5:7 or 7:5 window will be set inline via JS */ }
-.crop-toolbar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 8px; }
+
+/* Dark background outside crop area */
+.crop-mask { position: absolute; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(2px); }
+
+/* Visible frame around the 5:7 area */
+.crop-frame {
+  position: absolute;
+  border: 3px solid var(--color-primary);
+  box-shadow: 
+    0 0 0 2px rgba(0,0,0,0.8) inset,
+    0 0 20px rgba(0,255,255,0.8),
+    0 0 40px rgba(0,255,255,0.4);
+  pointer-events: none;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+/* Label at top of frame */
+.crop-label {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,10,35,0.95);
+  border: 2px solid var(--color-primary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: "Press Start 2P";
+  font-size: 10px;
+  white-space: nowrap;
+  box-shadow: 0 0 12px rgba(0,255,255,0.6);
+}
+
+/* Corner markers for better visibility */
+.crop-frame::before,
+.crop-frame::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--color-accent);
+}
+
+.crop-frame::before {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.crop-frame::after {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Toolbar at bottom */
+.crop-toolbar {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  background: rgba(10,10,35,0.95);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.crop-hint {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.crop-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 2px rgba(0,0,0,0.8) inset,
+      0 0 20px rgba(0,255,255,0.8),
+      0 0 40px rgba(0,255,255,0.4);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 2px rgba(0,0,0,0.8) inset,
+      0 0 25px rgba(0,255,255,1),
+      0 0 50px rgba(0,255,255,0.6);
+  }
+}
 
 .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
 .is-hidden { display: none !important; }

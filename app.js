@@ -406,8 +406,8 @@
 
   function ensureCropCompliance() {
     if (!state.imageBitmap) return;
-    // desired ratio 5:7 for portrait, 7:5 for landscape
-    const desired = state.orientation === 'portrait' ? (5/7) : (7/5);
+    // Always use 5:7 ratio (portrait poster format)
+    const desired = 5/7;
     const imgRatio = state.imageBitmap.width / state.imageBitmap.height;
     const needsCrop = Math.abs(imgRatio - desired) > 0.01; // tolerance
     console.log('Crop needed?', needsCrop);
@@ -422,24 +422,15 @@
     overlay?.classList.remove('is-hidden');
     overlay?.classList.add('active');
     state.crop.active = true;
-    // initialize crop to centered rectangle with desired ratio
+    // Initialize crop to centered rectangle with 5:7 ratio
     let cropW, cropH;
-    if (state.orientation === 'portrait') { // ratio 5:7 -> width/height ~ 0.714
-      // fit by height
-      cropH = state.imageBitmap.height;
-      cropW = Math.round(cropH * (5/7));
-      if (cropW > state.imageBitmap.width) {
-        cropW = state.imageBitmap.width;
-        cropH = Math.round(cropW * (7/5));
-      }
-    } else {
-      // landscape ratio 7:5
+    // Try to use full height first
+    cropH = state.imageBitmap.height;
+    cropW = Math.round(cropH * (5/7));
+    // If too wide, calculate from width
+    if (cropW > state.imageBitmap.width) {
       cropW = state.imageBitmap.width;
-      cropH = Math.round(cropW * (5/7));
-      if (cropH > state.imageBitmap.height) {
-        cropH = state.imageBitmap.height;
-        cropW = Math.round(cropH * (7/5));
-      }
+      cropH = Math.round(cropW * (7/5));
     }
     state.crop.w = cropW; state.crop.h = cropH;
     state.crop.x = Math.max(0, Math.round((state.imageBitmap.width - cropW) / 2));
@@ -505,8 +496,16 @@
     const y = Math.round(state.crop.y * scaleY);
     const w = Math.round(state.crop.w * scaleX);
     const h = Math.round(state.crop.h * scaleY);
-    // create a highlighted window by using CSS clip-path
-    overlay.querySelector('.crop-mask').style.clipPath = `polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 100% 0%, ${x + w}px 0%, ${x + w}px ${y}px, ${x}px ${y}px, ${x}px ${y + h}px, ${x + w}px ${y + h}px, ${x + w}px 100%, 0% 100%, 0% 0%)`;
+    // create a highlighted window by using CSS clip-path (inverted polygon - dark outside, clear inside)
+    overlay.querySelector('.crop-mask').style.clipPath = `polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, ${x}px ${y}px, ${x}px ${y + h}px, ${x + w}px ${y + h}px, ${x + w}px ${y}px, ${x}px ${y}px)`;
+    // Position the visible frame
+    const frame = overlay.querySelector('.crop-frame');
+    if (frame) {
+      frame.style.left = `${x}px`;
+      frame.style.top = `${y}px`;
+      frame.style.width = `${w}px`;
+      frame.style.height = `${h}px`;
+    }
   }
 
   function initSizesPricing() { /* sizes handled via dropdown in upload section */ }
