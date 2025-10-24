@@ -54,6 +54,16 @@
 
   function initFooterYear() { setText('year', new Date().getFullYear().toString()); }
 
+  // Helper to wait for Pixelate module
+  async function waitForPixelate() {
+    let attempts = 0;
+    while ((!window.Pixelate || !window.Pixelate.processToPreview) && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    return window.Pixelate && window.Pixelate.processToPreview;
+  }
+
   // Global drawToPreview function
   async function drawToPreview(bitmap) {
     const canvas = state.previewCanvas;
@@ -63,6 +73,15 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!bitmap) {
       overlay?.classList.remove('is-active');
+      return;
+    }
+    // Ensure Pixelate module is loaded
+    const pixelateReady = await waitForPixelate();
+    if (!pixelateReady) {
+      console.error('Pixelate module failed to load');
+      overlay?.classList.remove('is-active');
+      const uploadError = document.getElementById('uploadError');
+      if (uploadError) uploadError.textContent = 'Fehler beim Laden der Verarbeitungsmodule. Bitte Seite neu laden.';
       return;
     }
     // Process via Pixelate module
@@ -277,8 +296,14 @@
       };
       img.src = dataUrl;
     });
-    exportBtn.addEventListener('click', () => {
+    exportBtn.addEventListener('click', async () => {
       if (!state.imageBitmap) return;
+      // Ensure Pixelate module is loaded
+      const pixelateReady = await waitForPixelate();
+      if (!pixelateReady) {
+        alert('Fehler: Verarbeitungsmodule nicht geladen. Bitte Seite neu laden.');
+        return;
+      }
       // If size selected, map cm; otherwise fallback to A3 portrait
       const sizeMap = {
         '21x29.7': { w: 21, h: 29.7 },
