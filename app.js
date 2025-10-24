@@ -462,11 +462,34 @@
       if (!state.crop.active) return;
       e.preventDefault();
       const zoom = e.deltaY < 0 ? 1.04 : 0.96;
-      const newW = Math.max(10, Math.min(state.imageBitmap.width, Math.round(state.crop.w * zoom)));
-      const ratio = state.crop.h / state.crop.w; // keep ratio
-      const newH = Math.round(newW * ratio);
-      state.crop.w = newW; state.crop.h = newH;
-      // keep centered within image bounds
+      const ratio = 7/5; // 5:7 ratio means height/width = 7/5
+      
+      // Calculate new dimensions while maintaining 5:7 ratio
+      let newW = Math.round(state.crop.w * zoom);
+      let newH = Math.round(newW * ratio);
+      
+      // Ensure both dimensions stay within image bounds
+      if (newW > state.imageBitmap.width) {
+        newW = state.imageBitmap.width;
+        newH = Math.round(newW * ratio);
+      }
+      if (newH > state.imageBitmap.height) {
+        newH = state.imageBitmap.height;
+        newW = Math.round(newH / ratio);
+      }
+      
+      // Minimum size
+      const minW = 50;
+      const minH = Math.round(minW * ratio);
+      if (newW < minW) {
+        newW = minW;
+        newH = minH;
+      }
+      
+      state.crop.w = newW;
+      state.crop.h = newH;
+      
+      // Adjust position to keep within image bounds
       state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - state.crop.w, state.crop.x));
       state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - state.crop.h, state.crop.y));
       drawCropOverlay();
