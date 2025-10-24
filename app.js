@@ -120,7 +120,16 @@
     debugLog('drawToPreview COMPLETE');
   }
 
+  let uploadInitialized = false;
+
   function initUpload() {
+    if (uploadInitialized) {
+      debugLog('WARNUNG: initUpload bereits aufgerufen, überspringe doppelte Initialisierung');
+      return;
+    }
+    uploadInitialized = true;
+    debugLog('initUpload START - registriere Event-Handler');
+
     const dropzone = $('#dropzone');
     const fileInput = $('#fileInput');
     const browseBtn = document.getElementById('uploadBtn');
@@ -312,7 +321,16 @@
     }
   }
 
+  let controlsInitialized = false;
+
   function initControls() {
+    if (controlsInitialized) {
+      debugLog('WARNUNG: initControls bereits aufgerufen, überspringe');
+      return;
+    }
+    controlsInitialized = true;
+    debugLog('initControls START - registriere Control-Handler');
+
     const pixelResolution = document.getElementById('pixelResolution');
     const pixelResolutionValue = document.getElementById('pixelResolutionValue');
     const paletteSize = document.getElementById('paletteSize');
