@@ -24,9 +24,23 @@
       offsetX: 0,
       offsetY: 0,
     },
+    debugLogs: [],
   };
 
   function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
+
+  function debugLog(message, data = '') {
+    const timestamp = new Date().toISOString().substr(11, 12);
+    const logEntry = `[${timestamp}] ${message}${data ? ': ' + JSON.stringify(data) : ''}`;
+    console.log(logEntry);
+    state.debugLogs.push(logEntry);
+    if (state.debugLogs.length > 20) state.debugLogs.shift();
+    const debugEl = document.getElementById('debugInfo');
+    if (debugEl) {
+      debugEl.style.display = 'block';
+      debugEl.innerHTML = state.debugLogs.join('<br>');
+    }
+  }
 
   function initHeroCanvas() {
     const canvas = document.getElementById('hero-canvas');
@@ -133,20 +147,27 @@
     dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
     browseBtn?.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', async () => {
+      debugLog('FileInput change event triggered');
       const file = fileInput.files?.[0];
       if (file) {
+        debugLog('Selected file', { name: file.name, type: file.type, size: file.size });
         await handleFile(file);
         fileInput.value = ''; // Reset input to allow same file again
+      } else {
+        debugLog('No file selected');
       }
     });
 
     async function handleFile(file) {
+      debugLog('handleFile START', file.name);
       uploadError.textContent = '';
       const typeOk = /^(image\/(png|jpeg|jpg|pjpeg))$/i.test(file.type || '');
       if (!typeOk) {
+        debugLog('ERROR: Invalid file type', file.type);
         uploadError.textContent = 'Bitte PNG oder JPEG hochladen.';
         return;
       }
+      debugLog('File type OK, processing');
       if (file.size > 50 * 1024 * 1024) {
         uploadError.textContent = 'Datei ist zu groß (max. 50MB).';
         return;
@@ -154,9 +175,12 @@
       const overlay = document.getElementById('processingOverlay');
       overlay?.classList.add('is-active');
       try {
+        debugLog('Creating image bitmap');
         if (window.createImageBitmap) {
           state.originalImage = await createImageBitmap(file);
+          debugLog('Image bitmap created', `${state.originalImage.width}x${state.originalImage.height}`);
         } else {
+          debugLog('Using fallback image loading');
           // Fallback: object URL + HTMLImageElement
           state.originalImage = await new Promise((resolve, reject) => {
             const url = URL.createObjectURL(file);
@@ -165,10 +189,12 @@
             img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
             img.src = url;
           });
+          debugLog('Image loaded via fallback', `${state.originalImage.width}x${state.originalImage.height}`);
         }
         state.imageBitmap = state.originalImage;
         // Auto-detect orientation based on image
         state.orientation = state.imageBitmap.width >= state.imageBitmap.height ? 'landscape' : 'portrait';
+        debugLog('Orientation detected', state.orientation);
         // Populate sizes dropdown and enable it
         populateSizeDropdown();
         sizeOrientation.textContent = state.orientation === 'portrait' ? 'Hochformat' : 'Querformat';
@@ -178,11 +204,15 @@
         controlsPanel?.classList.remove('is-hidden');
         const previewCard = document.getElementById('previewCard');
         previewCard?.classList.remove('is-hidden');
+        debugLog('Checking crop compliance');
         ensureCropCompliance();
+        debugLog('Drawing preview');
         await drawToPreview(state.imageBitmap);
         state.history = [];
+        debugLog('✓ Upload COMPLETE!');
       } catch (err) {
-        console.error(err);
+        debugLog('ERROR in handleFile', err.message);
+        console.error('Full error:', err);
         uploadError.textContent = 'Bild konnte nicht geladen werden. Bitte versuche eine andere Datei.';
       } finally {
         overlay?.classList.remove('is-active');
@@ -442,16 +472,26 @@
 
   function initSizesPricing() { /* sizes handled via dropdown in upload section */ }
 
+  let isInitialized = false;
+
   async function init() {
-    // Wait for Pixelate module to be ready BEFORE initializing event handlers
-    console.log('Warte auf Pixelate-Modul...');
-    const pixelateReady = await waitForPixelate();
-    if (!pixelateReady) {
-      console.error('Pixelate-Modul konnte nicht geladen werden');
-      alert('Fehler beim Laden der Anwendung. Bitte Seite neu laden.');
+    // Prevent double initialization
+    if (isInitialized) {
+      debugLog('WARNUNG: App already initialized, skipping');
       return;
     }
-    console.log('Pixelate-Modul geladen, initialisiere App...');
+    isInitialized = true;
+
+    // Wait for Pixelate module to be ready BEFORE initializing event handlers
+    debugLog('Warte auf Pixelate-Modul');
+    const pixelateReady = await waitForPixelate();
+    if (!pixelateReady) {
+      debugLog('ERROR: Pixelate-Modul konnte nicht geladen werden');
+      alert('Fehler beim Laden der Anwendung. Bitte Seite neu laden.');
+      isInitialized = false;
+      return;
+    }
+    debugLog('✓ Pixelate-Modul geladen, initialisiere App');
     
     initHeroCanvas();
     initFooterYear();
@@ -477,10 +517,15 @@
         }
       }
     });
+    debugLog('✓ App-Initialisierung abgeschlossen!');
   }
 
-  if (document.readyState !== 'loading') init();
-  else document.addEventListener('DOMContentLoaded', init);
+  // Use 'interactive' or 'complete' as readyState check, then wait for all scripts
+  if (document.readyState === 'complete') {
+    init();
+  } else {
+    window.addEventListener('load', init);
+  }
 })();
 
 
