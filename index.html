@@ -105,8 +105,13 @@
                     <div class="canvas-wrap">
                         <canvas id="previewCanvas" class="preview-canvas" width="480" height="480" aria-label="Pixel art preview"></canvas>
                         <div id="processingOverlay" class="processing-overlay" aria-hidden="true" role="status" aria-live="polite">
-                            <div class="pixel-spinner" aria-hidden="true"></div>
-                            <span class="processing-text">Processing…</span>
+                            <div class="pixel-loader">
+                                <div class="pixel-block"></div>
+                                <div class="pixel-block"></div>
+                                <div class="pixel-block"></div>
+                                <div class="pixel-block"></div>
+                            </div>
+                            <span class="processing-text">Wird verarbeitet…</span>
                         </div>
                         <div id="cropOverlay" class="crop-overlay is-hidden" aria-hidden="true">
                             <div class="crop-mask"></div>
