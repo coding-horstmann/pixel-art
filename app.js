@@ -75,13 +75,12 @@
       overlay?.classList.remove('is-active');
       return;
     }
-    // Ensure Pixelate module is loaded
-    const pixelateReady = await waitForPixelate();
-    if (!pixelateReady) {
-      console.error('Pixelate module failed to load');
+    // Pixelate module is already loaded during init, but double-check for safety
+    if (!window.Pixelate || !window.Pixelate.processToPreview) {
+      console.error('Pixelate module not available');
       overlay?.classList.remove('is-active');
       const uploadError = document.getElementById('uploadError');
-      if (uploadError) uploadError.textContent = 'Fehler beim Laden der Verarbeitungsmodule. Bitte Seite neu laden.';
+      if (uploadError) uploadError.textContent = 'Fehler: Verarbeitungsmodul nicht verfügbar. Bitte Seite neu laden.';
       return;
     }
     // Process via Pixelate module
@@ -296,11 +295,10 @@
       };
       img.src = dataUrl;
     });
-    exportBtn.addEventListener('click', async () => {
+    exportBtn.addEventListener('click', () => {
       if (!state.imageBitmap) return;
-      // Ensure Pixelate module is loaded
-      const pixelateReady = await waitForPixelate();
-      if (!pixelateReady) {
+      // Pixelate module is already loaded during init
+      if (!window.Pixelate || !window.Pixelate.exportForPrint) {
         alert('Fehler: Verarbeitungsmodule nicht geladen. Bitte Seite neu laden.');
         return;
       }
@@ -444,7 +442,17 @@
 
   function initSizesPricing() { /* sizes handled via dropdown in upload section */ }
 
-  function init() {
+  async function init() {
+    // Wait for Pixelate module to be ready BEFORE initializing event handlers
+    console.log('Warte auf Pixelate-Modul...');
+    const pixelateReady = await waitForPixelate();
+    if (!pixelateReady) {
+      console.error('Pixelate-Modul konnte nicht geladen werden');
+      alert('Fehler beim Laden der Anwendung. Bitte Seite neu laden.');
+      return;
+    }
+    console.log('Pixelate-Modul geladen, initialisiere App...');
+    
     initHeroCanvas();
     initFooterYear();
     initUpload();
