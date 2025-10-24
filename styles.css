@@ -654,8 +654,83 @@ select:hover {
 
 @keyframes breathe { 0%, 100% { transform: translateY(0); opacity: .9; } 50% { transform: translateY(-2px); opacity: 1; } }
 
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: linear-gradient(135deg, rgba(0,255,255,.15), rgba(255,20,147,.15));
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: 0 0 20px rgba(0,255,255,.6), 0 0 40px rgba(255,20,147,.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  transform: translateX(400px);
+  opacity: 0;
+  transition: all .4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  backdrop-filter: blur(8px);
+}
+
+.toast-notification.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-icon {
+  font-size: 24px;
+  animation: pulse-icon 1s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.toast-message {
+  flex: 1;
+  font-family: "Press Start 2P", system-ui;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text);
+  text-shadow: 0 0 8px rgba(0,255,255,.6);
+}
+
+.toast-close {
+  background: none;
+  border: 1px solid rgba(255,255,255,.3);
+  color: var(--color-text);
+  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: all .15s ease;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.toast-close:hover {
+  background: rgba(255,20,147,.3);
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 10px rgba(255,20,147,.6);
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 768px) {
+  .toast-notification {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+  }
 }
 

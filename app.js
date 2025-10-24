@@ -2,6 +2,49 @@
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => ctx.querySelectorAll(sel);
 
+  // Toast Notification System
+  function showToast(message, icon = '✓', duration = 3000) {
+    // Remove any existing toast
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+      existingToast.remove();
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-message">${message}</div>
+      <button class="toast-close" aria-label="Schließen">✕</button>
+    `;
+
+    // Add to body
+    document.body.appendChild(toast);
+
+    // Show animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+    });
+
+    // Close button handler
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    });
+
+    // Auto-hide after duration
+    if (duration > 0) {
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+      }, duration);
+    }
+  }
+
   const state = {
     originalImage: null,
     imageBitmap: null,
@@ -362,6 +405,8 @@
       const mPrice = document.getElementById('modalPrice');
       if (mSize) mSize.textContent = `${state.cart.length} Artikel`;
       if (mPrice) mPrice.textContent = `€${total.toFixed(2)}`;
+      // Show feedback
+      showToast('Artikel wurde entfernt', '🗑️', 2000);
     }
     function closeModal() {
       const modal = document.getElementById('checkoutModal');
@@ -385,7 +430,7 @@
       const cartCount = document.getElementById('cartCount');
       if (cartCount) cartCount.textContent = String(state.cartCount);
       // Show feedback
-      alert('Bild wurde zum Warenkorb hinzugefügt!');
+      showToast('Bild wurde zum Warenkorb hinzugefügt!', '🛒');
     });
     buyNowBtn?.addEventListener('click', () => {
       if (!state.selectedSize || !state.previewCanvas) return;
