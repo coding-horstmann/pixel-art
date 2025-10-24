@@ -80,23 +80,27 @@
 
   // Global drawToPreview function
   async function drawToPreview(bitmap) {
+    debugLog('drawToPreview START');
     const canvas = state.previewCanvas;
     const ctx = state.previewCtx;
+    debugLog('Canvas found?', !!canvas);
     const overlay = document.getElementById('processingOverlay');
     overlay?.classList.add('is-active');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!bitmap) {
+      debugLog('No bitmap provided');
       overlay?.classList.remove('is-active');
       return;
     }
     // Pixelate module is already loaded during init, but double-check for safety
     if (!window.Pixelate || !window.Pixelate.processToPreview) {
-      console.error('Pixelate module not available');
+      debugLog('ERROR: Pixelate module not available');
       overlay?.classList.remove('is-active');
       const uploadError = document.getElementById('uploadError');
       if (uploadError) uploadError.textContent = 'Fehler: Verarbeitungsmodul nicht verfügbar. Bitte Seite neu laden.';
       return;
     }
+    debugLog('Processing with Pixelate module');
     // Process via Pixelate module
     const result = window.Pixelate.processToPreview(bitmap, {
       gridSize: state.pixelResolution,
@@ -106,11 +110,14 @@
       outHeight: canvas.height,
       crop: state.crop && !state.crop.active && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
     });
+    debugLog('Pixelate processing done, drawing to canvas');
     ctx.drawImage(result.canvas, 0, 0);
+    debugLog('Canvas drawn, updating history');
     // Push to history as data URL for undo
     state.history.push(canvas.toDataURL());
     if (state.history.length > 20) state.history.shift();
     overlay?.classList.remove('is-active');
+    debugLog('drawToPreview COMPLETE');
   }
 
   function initUpload() {
@@ -143,9 +150,20 @@
       const file = e.dataTransfer?.files?.[0];
       if (file) await handleFile(file);
     });
-    dropzone.addEventListener('click', () => fileInput.click());
-    dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
-    browseBtn?.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('click', () => {
+      debugLog('Dropzone clicked, opening file picker');
+      fileInput.click();
+    });
+    dropzone.addEventListener('keydown', (e) => { 
+      if (e.key === 'Enter' || e.key === ' ') {
+        debugLog('Dropzone key pressed, opening file picker');
+        fileInput.click();
+      }
+    });
+    browseBtn?.addEventListener('click', () => {
+      debugLog('Browse button clicked, opening file picker');
+      fileInput.click();
+    });
     fileInput.addEventListener('change', async () => {
       debugLog('FileInput change event triggered');
       const file = fileInput.files?.[0];
@@ -201,9 +219,17 @@
         sizeSelect.disabled = false;
         // Reveal controls panel now that an image exists
         const controlsPanel = document.getElementById('controlsPanel');
-        controlsPanel?.classList.remove('is-hidden');
+        debugLog('controlsPanel found?', !!controlsPanel);
+        if (controlsPanel) {
+          controlsPanel.classList.remove('is-hidden');
+          debugLog('controlsPanel is-hidden removed');
+        }
         const previewCard = document.getElementById('previewCard');
-        previewCard?.classList.remove('is-hidden');
+        debugLog('previewCard found?', !!previewCard);
+        if (previewCard) {
+          previewCard.classList.remove('is-hidden');
+          debugLog('previewCard is-hidden removed');
+        }
         debugLog('Checking crop compliance');
         ensureCropCompliance();
         debugLog('Drawing preview');
@@ -374,12 +400,15 @@
     const desired = state.orientation === 'portrait' ? (5/7) : (7/5);
     const imgRatio = state.imageBitmap.width / state.imageBitmap.height;
     const needsCrop = Math.abs(imgRatio - desired) > 0.01; // tolerance
+    debugLog('Crop needed?', needsCrop);
     const overlay = document.getElementById('cropOverlay');
     if (!needsCrop) {
+      debugLog('No crop needed, hiding overlay');
       overlay?.classList.add('is-hidden');
       state.crop.active = false;
       return false;
     }
+    debugLog('Crop needed, showing overlay');
     overlay?.classList.remove('is-hidden');
     overlay?.classList.add('active');
     state.crop.active = true;
