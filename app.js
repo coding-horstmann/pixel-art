@@ -24,23 +24,9 @@
       offsetX: 0,
       offsetY: 0,
     },
-    debugLogs: [],
   };
 
   function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
-
-  function debugLog(message, data = '') {
-    const timestamp = new Date().toISOString().substr(11, 12);
-    const logEntry = `[${timestamp}] ${message}${data ? ': ' + JSON.stringify(data) : ''}`;
-    console.log(logEntry);
-    state.debugLogs.push(logEntry);
-    if (state.debugLogs.length > 20) state.debugLogs.shift();
-    const debugEl = document.getElementById('debugInfo');
-    if (debugEl) {
-      debugEl.style.display = 'block';
-      debugEl.innerHTML = state.debugLogs.join('<br>');
-    }
-  }
 
   function initHeroCanvas() {
     const canvas = document.getElementById('hero-canvas');
@@ -80,27 +66,27 @@
 
   // Global drawToPreview function
   async function drawToPreview(bitmap) {
-    debugLog('drawToPreview START');
+    console.log('drawToPreview START');
     const canvas = state.previewCanvas;
     const ctx = state.previewCtx;
-    debugLog('Canvas found?', !!canvas);
+    console.log('Canvas found?', !!canvas);
     const overlay = document.getElementById('processingOverlay');
     overlay?.classList.add('is-active');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!bitmap) {
-      debugLog('No bitmap provided');
+      console.log('No bitmap provided');
       overlay?.classList.remove('is-active');
       return;
     }
     // Pixelate module is already loaded during init, but double-check for safety
     if (!window.Pixelate || !window.Pixelate.processToPreview) {
-      debugLog('ERROR: Pixelate module not available');
+      console.log('ERROR: Pixelate module not available');
       overlay?.classList.remove('is-active');
       const uploadError = document.getElementById('uploadError');
       if (uploadError) uploadError.textContent = 'Fehler: Verarbeitungsmodul nicht verfügbar. Bitte Seite neu laden.';
       return;
     }
-    debugLog('Processing with Pixelate module');
+    console.log('Processing with Pixelate module');
     // Process via Pixelate module
     const result = window.Pixelate.processToPreview(bitmap, {
       gridSize: state.pixelResolution,
@@ -110,25 +96,25 @@
       outHeight: canvas.height,
       crop: state.crop && !state.crop.active && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
     });
-    debugLog('Pixelate processing done, drawing to canvas');
+    console.log('Pixelate processing done, drawing to canvas');
     ctx.drawImage(result.canvas, 0, 0);
-    debugLog('Canvas drawn, updating history');
+    console.log('Canvas drawn, updating history');
     // Push to history as data URL for undo
     state.history.push(canvas.toDataURL());
     if (state.history.length > 20) state.history.shift();
     overlay?.classList.remove('is-active');
-    debugLog('drawToPreview COMPLETE');
+    console.log('drawToPreview COMPLETE');
   }
 
   let uploadInitialized = false;
 
   function initUpload() {
     if (uploadInitialized) {
-      debugLog('WARNUNG: initUpload bereits aufgerufen, überspringe doppelte Initialisierung');
+      console.log('WARNUNG: initUpload bereits aufgerufen, überspringe doppelte Initialisierung');
       return;
     }
     uploadInitialized = true;
-    debugLog('initUpload START - registriere Event-Handler');
+    console.log('initUpload START - registriere Event-Handler');
 
     const dropzone = $('#dropzone');
     const fileInput = $('#fileInput');
@@ -159,42 +145,48 @@
       const file = e.dataTransfer?.files?.[0];
       if (file) await handleFile(file);
     });
-    dropzone.addEventListener('click', () => {
-      debugLog('Dropzone clicked, opening file picker');
+    dropzone.addEventListener('click', (e) => {
+      // Verhindere Event, wenn der Button geklickt wurde (Event Bubbling)
+      if (e.target === browseBtn || browseBtn?.contains(e.target)) {
+        console.log('Click was on button, letting button handler handle it');
+        return;
+      }
+      console.log('Dropzone clicked, opening file picker');
       fileInput.click();
     });
     dropzone.addEventListener('keydown', (e) => { 
       if (e.key === 'Enter' || e.key === ' ') {
-        debugLog('Dropzone key pressed, opening file picker');
+        console.log('Dropzone key pressed, opening file picker');
         fileInput.click();
       }
     });
-    browseBtn?.addEventListener('click', () => {
-      debugLog('Browse button clicked, opening file picker');
+    browseBtn?.addEventListener('click', (e) => {
+      e.stopPropagation(); // Verhindere Event-Bubbling zur Dropzone
+      console.log('Browse button clicked, opening file picker');
       fileInput.click();
     });
     fileInput.addEventListener('change', async () => {
-      debugLog('FileInput change event triggered');
+      console.log('FileInput change event triggered');
       const file = fileInput.files?.[0];
       if (file) {
-        debugLog('Selected file', { name: file.name, type: file.type, size: file.size });
+        console.log('Selected file', { name: file.name, type: file.type, size: file.size });
         await handleFile(file);
         fileInput.value = ''; // Reset input to allow same file again
       } else {
-        debugLog('No file selected');
+        console.log('No file selected');
       }
     });
 
     async function handleFile(file) {
-      debugLog('handleFile START', file.name);
+      console.log('handleFile START', file.name);
       uploadError.textContent = '';
       const typeOk = /^(image\/(png|jpeg|jpg|pjpeg))$/i.test(file.type || '');
       if (!typeOk) {
-        debugLog('ERROR: Invalid file type', file.type);
+        console.log('ERROR: Invalid file type', file.type);
         uploadError.textContent = 'Bitte PNG oder JPEG hochladen.';
         return;
       }
-      debugLog('File type OK, processing');
+      console.log('File type OK, processing');
       if (file.size > 50 * 1024 * 1024) {
         uploadError.textContent = 'Datei ist zu groß (max. 50MB).';
         return;
@@ -202,12 +194,12 @@
       const overlay = document.getElementById('processingOverlay');
       overlay?.classList.add('is-active');
       try {
-        debugLog('Creating image bitmap');
+        console.log('Creating image bitmap');
         if (window.createImageBitmap) {
           state.originalImage = await createImageBitmap(file);
-          debugLog('Image bitmap created', `${state.originalImage.width}x${state.originalImage.height}`);
+          console.log('Image bitmap created', `${state.originalImage.width}x${state.originalImage.height}`);
         } else {
-          debugLog('Using fallback image loading');
+          console.log('Using fallback image loading');
           // Fallback: object URL + HTMLImageElement
           state.originalImage = await new Promise((resolve, reject) => {
             const url = URL.createObjectURL(file);
@@ -216,37 +208,37 @@
             img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
             img.src = url;
           });
-          debugLog('Image loaded via fallback', `${state.originalImage.width}x${state.originalImage.height}`);
+          console.log('Image loaded via fallback', `${state.originalImage.width}x${state.originalImage.height}`);
         }
         state.imageBitmap = state.originalImage;
         // Auto-detect orientation based on image
         state.orientation = state.imageBitmap.width >= state.imageBitmap.height ? 'landscape' : 'portrait';
-        debugLog('Orientation detected', state.orientation);
+        console.log('Orientation detected', state.orientation);
         // Populate sizes dropdown and enable it
         populateSizeDropdown();
         sizeOrientation.textContent = state.orientation === 'portrait' ? 'Hochformat' : 'Querformat';
         sizeSelect.disabled = false;
         // Reveal controls panel now that an image exists
         const controlsPanel = document.getElementById('controlsPanel');
-        debugLog('controlsPanel found?', !!controlsPanel);
+        console.log('controlsPanel found?', !!controlsPanel);
         if (controlsPanel) {
           controlsPanel.classList.remove('is-hidden');
-          debugLog('controlsPanel is-hidden removed');
+          console.log('controlsPanel is-hidden removed');
         }
         const previewCard = document.getElementById('previewCard');
-        debugLog('previewCard found?', !!previewCard);
+        console.log('previewCard found?', !!previewCard);
         if (previewCard) {
           previewCard.classList.remove('is-hidden');
-          debugLog('previewCard is-hidden removed');
+          console.log('previewCard is-hidden removed');
         }
-        debugLog('Checking crop compliance');
+        console.log('Checking crop compliance');
         ensureCropCompliance();
-        debugLog('Drawing preview');
+        console.log('Drawing preview');
         await drawToPreview(state.imageBitmap);
         state.history = [];
-        debugLog('✓ Upload COMPLETE!');
+        console.log('✓ Upload COMPLETE!');
       } catch (err) {
-        debugLog('ERROR in handleFile', err.message);
+        console.log('ERROR in handleFile', err.message);
         console.error('Full error:', err);
         uploadError.textContent = 'Bild konnte nicht geladen werden. Bitte versuche eine andere Datei.';
       } finally {
@@ -325,11 +317,11 @@
 
   function initControls() {
     if (controlsInitialized) {
-      debugLog('WARNUNG: initControls bereits aufgerufen, überspringe');
+      console.log('WARNUNG: initControls bereits aufgerufen, überspringe');
       return;
     }
     controlsInitialized = true;
-    debugLog('initControls START - registriere Control-Handler');
+    console.log('initControls START - registriere Control-Handler');
 
     const pixelResolution = document.getElementById('pixelResolution');
     const pixelResolutionValue = document.getElementById('pixelResolutionValue');
@@ -418,15 +410,15 @@
     const desired = state.orientation === 'portrait' ? (5/7) : (7/5);
     const imgRatio = state.imageBitmap.width / state.imageBitmap.height;
     const needsCrop = Math.abs(imgRatio - desired) > 0.01; // tolerance
-    debugLog('Crop needed?', needsCrop);
+    console.log('Crop needed?', needsCrop);
     const overlay = document.getElementById('cropOverlay');
     if (!needsCrop) {
-      debugLog('No crop needed, hiding overlay');
+      console.log('No crop needed, hiding overlay');
       overlay?.classList.add('is-hidden');
       state.crop.active = false;
       return false;
     }
-    debugLog('Crop needed, showing overlay');
+    console.log('Crop needed, showing overlay');
     overlay?.classList.remove('is-hidden');
     overlay?.classList.add('active');
     state.crop.active = true;
@@ -524,21 +516,21 @@
   async function init() {
     // Prevent double initialization
     if (isInitialized) {
-      debugLog('WARNUNG: App already initialized, skipping');
+      console.log('WARNUNG: App already initialized, skipping');
       return;
     }
     isInitialized = true;
 
     // Wait for Pixelate module to be ready BEFORE initializing event handlers
-    debugLog('Warte auf Pixelate-Modul');
+    console.log('Warte auf Pixelate-Modul');
     const pixelateReady = await waitForPixelate();
     if (!pixelateReady) {
-      debugLog('ERROR: Pixelate-Modul konnte nicht geladen werden');
+      console.log('ERROR: Pixelate-Modul konnte nicht geladen werden');
       alert('Fehler beim Laden der Anwendung. Bitte Seite neu laden.');
       isInitialized = false;
       return;
     }
-    debugLog('✓ Pixelate-Modul geladen, initialisiere App');
+    console.log('✓ Pixelate-Modul geladen, initialisiere App');
     
     initHeroCanvas();
     initFooterYear();
@@ -564,7 +556,7 @@
         }
       }
     });
-    debugLog('✓ App-Initialisierung abgeschlossen!');
+    console.log('✓ App-Initialisierung abgeschlossen!');
   }
 
   // Use 'interactive' or 'complete' as readyState check, then wait for all scripts
