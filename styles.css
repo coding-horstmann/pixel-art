@@ -341,27 +341,11 @@ body::after {
   gap: 12px;
 }
 
-.section-header {
-  grid-column: 1 / -1;
-  font-family: "Press Start 2P";
-  font-size: 11px;
-  margin: 0 0 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,.15);
-  color: var(--color-muted);
-}
-
 /* Order section - make it stand out */
 .order-section {
   background: linear-gradient(135deg, rgba(0,255,255,.08), rgba(255,20,147,.06));
   border: 2px solid rgba(0,255,255,.3);
   box-shadow: 0 0 20px rgba(0,255,255,.15);
-}
-
-.order-section .section-header {
-  color: var(--color-primary);
-  text-shadow: 0 0 8px rgba(0,255,255,.6);
-  border-bottom-color: rgba(0,255,255,.3);
 }
 
 .control-group { display: grid; gap: 8px; }
