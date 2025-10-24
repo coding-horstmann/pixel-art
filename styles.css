@@ -255,11 +255,6 @@ body::after {
   text-align: center;
 }
 
-.crop-buttons {
-  display: flex;
-  gap: 8px;
-}
-
 @keyframes pulse-border {
   0%, 100% {
     box-shadow: 

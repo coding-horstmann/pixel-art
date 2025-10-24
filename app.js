@@ -442,11 +442,15 @@
 
   function wireCropInteractions() {
     const overlay = document.getElementById('cropOverlay');
-    const cancelBtn = document.getElementById('cropCancel');
-    const applyBtn = document.getElementById('cropApply');
     let dragging = false; let lastX = 0; let lastY = 0;
     overlay.addEventListener('mousedown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
-    window.addEventListener('mouseup', () => { dragging = false; });
+    window.addEventListener('mouseup', () => { 
+      if (dragging && state.crop.active) {
+        // Update preview after drag ends
+        drawToPreview(state.imageBitmap);
+      }
+      dragging = false;
+    });
     window.addEventListener('mousemove', (e) => {
       if (!dragging || !state.crop.active) return;
       const dx = e.clientX - lastX; const dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
@@ -493,19 +497,9 @@
       state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - state.crop.w, state.crop.x));
       state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - state.crop.h, state.crop.y));
       drawCropOverlay();
-    }, { passive: false });
-    cancelBtn.addEventListener('click', () => {
-      overlay.classList.add('is-hidden');
-      overlay.classList.remove('active');
-      state.crop.active = false;
-    });
-    applyBtn.addEventListener('click', () => {
-      overlay.classList.add('is-hidden');
-      overlay.classList.remove('active');
-      state.crop.active = false;
-      // Redraw with crop applied
+      // Update preview immediately after zoom
       drawToPreview(state.imageBitmap);
-    });
+    }, { passive: false });
   }
 
   function drawCropOverlay() {
