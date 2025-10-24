@@ -10,6 +10,7 @@
     pixelResolution: 32,
     paletteSize: 16,
     dithering: 'none',
+    brightness: 0,
     orientation: 'portrait',
     selectedSize: null,
     price: 0,
@@ -92,6 +93,7 @@
       gridSize: state.pixelResolution,
       paletteSize: state.paletteSize,
       dithering: state.dithering,
+      brightness: state.brightness,
       outWidth: canvas.width,
       outHeight: canvas.height,
       crop: state.crop && !state.crop.active && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
@@ -325,6 +327,8 @@
 
     const pixelResolution = document.getElementById('pixelResolution');
     const pixelResolutionValue = document.getElementById('pixelResolutionValue');
+    const brightness = document.getElementById('brightness');
+    const brightnessValue = document.getElementById('brightnessValue');
     const paletteSize = document.getElementById('paletteSize');
     const dithering = document.getElementById('dithering');
     const resetBtn = document.getElementById('resetBtn');
@@ -334,6 +338,11 @@
     pixelResolution.addEventListener('input', () => {
       state.pixelResolution = parseInt(pixelResolution.value, 10);
       pixelResolutionValue.textContent = pixelResolution.value;
+      if (state.imageBitmap) requestAnimationFrame(() => drawToPreview(state.imageBitmap));
+    });
+    brightness.addEventListener('input', () => {
+      state.brightness = parseInt(brightness.value, 10);
+      brightnessValue.textContent = brightness.value > 0 ? `+${brightness.value}` : brightness.value;
       if (state.imageBitmap) requestAnimationFrame(() => drawToPreview(state.imageBitmap));
     });
     paletteSize.addEventListener('change', () => {
@@ -384,6 +393,7 @@
         gridSize: state.pixelResolution,
         paletteSize: state.paletteSize,
         dithering: state.dithering,
+        brightness: state.brightness,
         cmWidth: o.w,
         cmHeight: o.h,
         orientation: state.orientation,

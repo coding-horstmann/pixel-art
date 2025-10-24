@@ -12,6 +12,19 @@
     return ctx.getImageData(0, 0, canvas.width, canvas.height);
   }
 
+  function adjustBrightness(imageData, brightness) {
+    if (brightness === 0) return imageData;
+    const { data } = imageData;
+    for (let i = 0; i < data.length; i += 4) {
+      const a = data[i + 3];
+      if (a < 16) continue; // skip transparent pixels
+      data[i] = clamp(data[i] + brightness, 0, 255);     // R
+      data[i+1] = clamp(data[i+1] + brightness, 0, 255); // G
+      data[i+2] = clamp(data[i+2] + brightness, 0, 255); // B
+    }
+    return imageData;
+  }
+
   function putImageData(canvas, imageData) {
     const ctx = canvas.getContext('2d');
     ctx.putImageData(imageData, 0, 0);
@@ -167,7 +180,7 @@
   }
 
   function processToPreview(image, options) {
-    const { gridSize = 32, paletteSize = 16, dithering = 'none', outWidth = 640, outHeight = 640, crop } = options;
+    const { gridSize = 32, paletteSize = 16, dithering = 'none', brightness = 0, outWidth = 640, outHeight = 640, crop } = options;
     // 1) Scale image to small grid canvas (maintain aspect)
     const source = crop ? (() => {
       const s = createCanvas(crop.w, crop.h);
@@ -176,10 +189,15 @@
       return s;
     })() : image;
     const gridCanvas = drawImageToGridCanvas(source, gridSize);
-    // 2) Build palette with k-means
-    const gridData = getImageData(gridCanvas);
+    // 2) Adjust brightness if needed
+    let gridData = getImageData(gridCanvas);
+    if (brightness !== 0) {
+      gridData = adjustBrightness(gridData, brightness);
+      putImageData(gridCanvas, gridData);
+    }
+    // 3) Build palette with k-means
     const palette = kMeansPalette(gridData, paletteSize, 8, Math.max(1, Math.round(gridSize / 16)));
-    // 3) Quantize + Dither on grid
+    // 4) Quantize + Dither on grid
     const quantized = applyQuantization(gridData, palette, dithering);
     putImageData(gridCanvas, quantized);
     // 4) Scale up to preview output with nearest-neighbor, centered
@@ -199,15 +217,15 @@
   }
 
   function exportForPrint(image, options) {
-    // options: { gridSize, paletteSize, dithering, cmWidth, cmHeight, orientation }
-    const { gridSize = 64, paletteSize = 16, dithering = 'none', cmWidth = 29.7, cmHeight = 42, orientation = 'portrait', dpi = 300 } = options;
+    // options: { gridSize, paletteSize, dithering, brightness, cmWidth, cmHeight, orientation }
+    const { gridSize = 64, paletteSize = 16, dithering = 'none', brightness = 0, cmWidth = 29.7, cmHeight = 42, orientation = 'portrait', dpi = 300 } = options;
     const inPerCm = 0.3937007874;
     const wIn = cmWidth * inPerCm;
     const hIn = cmHeight * inPerCm;
     const pxW = Math.round(wIn * dpi);
     const pxH = Math.round(hIn * dpi);
     // Process to grid first
-    const processed = processToPreview(image, { gridSize, paletteSize, dithering, outWidth: pxW, outHeight: pxH, crop: options.crop });
+    const processed = processToPreview(image, { gridSize, paletteSize, dithering, brightness, outWidth: pxW, outHeight: pxH, crop: options.crop });
     return processed.canvas;
   }
 
