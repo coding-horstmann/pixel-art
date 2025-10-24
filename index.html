@@ -124,49 +124,64 @@
                         </div>
                     </div>
                     <div class="controls is-hidden" id="controlsPanel">
-                        <div class="control-group">
-                            <label for="pixelResolution">Pixel Resolution</label>
-                            <input id="pixelResolution" type="range" min="8" max="128" step="8" value="32">
-                            <div class="control-meta"><span id="pixelResolutionValue">32</span> px grid</div>
+                        <!-- Stil-Anpassungen (optional) -->
+                        <div class="control-section">
+                            <h3 class="section-header">🎨 Stil anpassen</h3>
+                            <div class="control-group">
+                                <label for="pixelResolution">Pixel Resolution</label>
+                                <input id="pixelResolution" type="range" min="8" max="128" step="8" value="32">
+                                <div class="control-meta"><span id="pixelResolutionValue">32</span> px grid</div>
+                            </div>
+                            <div class="control-group">
+                                <label for="brightness">Helligkeit</label>
+                                <input id="brightness" type="range" min="-100" max="100" step="5" value="0">
+                                <div class="control-meta"><span id="brightnessValue">0</span></div>
+                            </div>
+                            <div class="control-group">
+                                <label for="paletteSize">Color Palette</label>
+                                <select id="paletteSize">
+                                    <option value="4">4 colors (Game Boy)</option>
+                                    <option value="8">8 colors (NES)</option>
+                                    <option value="16" selected>16 colors (SNES)</option>
+                                    <option value="32">32 colors</option>
+                                    <option value="64">64 colors</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="dithering">Dithering</label>
+                                <select id="dithering">
+                                    <option value="none" selected>None</option>
+                                    <option value="floyd">Floyd–Steinberg</option>
+                                    <option value="bayer">Ordered (Bayer)</option>
+                                </select>
+                            </div>
+                            <div class="control-row">
+                                <button id="resetBtn" type="button" class="btn btn-ghost btn-util">Reset</button>
+                                <button id="undoBtn" type="button" class="btn btn-secondary btn-util">Undo</button>
+                            </div>
                         </div>
-                        <div class="control-group">
-                            <label for="brightness">Helligkeit</label>
-                            <input id="brightness" type="range" min="-100" max="100" step="5" value="0">
-                            <div class="control-meta"><span id="brightnessValue">0</span></div>
-                        </div>
-                        <div class="control-group">
-                            <label for="paletteSize">Color Palette</label>
-                            <select id="paletteSize">
-                                <option value="4">4 colors (Game Boy)</option>
-                                <option value="8">8 colors (NES)</option>
-                                <option value="16" selected>16 colors (SNES)</option>
-                                <option value="32">32 colors</option>
-                                <option value="64">64 colors</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label for="dithering">Dithering</label>
-                            <select id="dithering">
-                                <option value="none" selected>None</option>
-                                <option value="floyd">Floyd–Steinberg</option>
-                                <option value="bayer">Ordered (Bayer)</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label for="sizeSelect">Postergröße</label>
-                            <select id="sizeSelect" disabled>
-                                <option>Bitte zuerst ein Bild hochladen</option>
-                            </select>
-                            <div class="control-meta">Preis: <strong id="sizePrice">€0.00</strong> · <span id="sizeOrientation">—</span></div>
-                        </div>
-                        <div class="control-row">
-                            <button id="resetBtn" type="button" class="btn btn-ghost btn-util">Reset</button>
-                            <button id="undoBtn" type="button" class="btn btn-secondary btn-util">Undo</button>
-                            <button id="exportBtn" type="button" class="btn btn-primary btn-util">Export High-Res</button>
-                        </div>
-                        <div class="control-row">
-                            <button id="addToCartBtn" type="button" class="btn btn-secondary btn-purchase">In den Warenkorb</button>
-                            <button id="buyNowBtn" type="button" class="btn btn-primary btn-purchase">Direkt kaufen</button>
+
+                        <!-- Poster Bestellen (Pflicht) -->
+                        <div class="control-section order-section">
+                            <h3 class="section-header">📦 Poster bestellen</h3>
+                            <div class="control-group size-select-group">
+                                <label for="sizeSelect" class="label-important">Postergröße wählen</label>
+                                <select id="sizeSelect" disabled class="select-important">
+                                    <option>Bitte zuerst ein Bild hochladen</option>
+                                </select>
+                                <div class="control-meta price-display">
+                                    <span class="price-label">Preis:</span> <strong id="sizePrice" class="price-value">€0.00</strong>
+                                    <span class="sep">·</span>
+                                    <span id="sizeOrientation" class="orientation">—</span>
+                                </div>
+                            </div>
+                            <div class="control-row">
+                                <button id="exportBtn" type="button" class="btn btn-secondary btn-util">Export High-Res</button>
+                            </div>
+                            <div class="control-row purchase-row">
+                                <button id="addToCartBtn" type="button" class="btn btn-secondary btn-purchase">In den Warenkorb</button>
+                                <button id="buyNowBtn" type="button" class="btn btn-primary btn-purchase">Direkt kaufen</button>
+                            </div>
                         </div>
                     </div>
                 </div>

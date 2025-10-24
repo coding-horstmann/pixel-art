@@ -327,11 +327,79 @@ body::after {
   }
 }
 
-.controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+.controls { display: flex; flex-direction: column; gap: 20px; margin-top: 12px; }
 .is-hidden { display: none !important; }
+
+/* Separate control sections */
+.control-section {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.section-header {
+  grid-column: 1 / -1;
+  font-family: "Press Start 2P";
+  font-size: 11px;
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  color: var(--color-muted);
+}
+
+/* Order section - make it stand out */
+.order-section {
+  background: linear-gradient(135deg, rgba(0,255,255,.08), rgba(255,20,147,.06));
+  border: 2px solid rgba(0,255,255,.3);
+  box-shadow: 0 0 20px rgba(0,255,255,.15);
+}
+
+.order-section .section-header {
+  color: var(--color-primary);
+  text-shadow: 0 0 8px rgba(0,255,255,.6);
+  border-bottom-color: rgba(0,255,255,.3);
+}
+
 .control-group { display: grid; gap: 8px; }
+.size-select-group { grid-column: 1 / -1; }
 .control-row { display: flex; gap: 8px; grid-column: 1 / -1; }
+.purchase-row { margin-top: 8px; }
+
 label { font-weight: 700; font-size: 12px; }
+.label-important { 
+  font-size: 13px; 
+  color: var(--color-primary);
+  text-shadow: 0 0 6px rgba(0,255,255,.4);
+}
+
+.select-important {
+  font-size: 15px;
+  font-weight: 600;
+  border: 2px solid rgba(0,255,255,.4);
+}
+
+.price-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 8px 12px;
+  background: rgba(0,255,255,.1);
+  border-radius: 6px;
+  border: 1px solid rgba(0,255,255,.2);
+}
+
+.price-value {
+  color: var(--color-primary);
+  font-size: 16px;
+  text-shadow: 0 0 8px rgba(0,255,255,.6);
+}
+
+.sep { color: var(--color-muted); }
 input[type="range"], select, input, textarea { width: 100%; background: rgba(255,255,255,.06); color: var(--color-text); border: 1px solid rgba(255,255,255,.2); border-radius: var(--radius); padding: 10px; }
 input[type="range"]:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px dashed var(--color-accent); outline-offset: 2px; }
 
@@ -415,7 +483,7 @@ select:hover {
 }
 @media (max-width: 768px) {
   .hero-grid { grid-template-columns: 1fr; }
-  .controls { grid-template-columns: 1fr; }
+  .control-section { grid-template-columns: 1fr; }
   .sizes-grid { grid-template-columns: 1fr; }
   .inspo-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; text-align: center; }
