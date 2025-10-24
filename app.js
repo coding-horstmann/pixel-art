@@ -452,26 +452,166 @@
 
   function wireCropInteractions() {
     const overlay = document.getElementById('cropOverlay');
-    let dragging = false; let lastX = 0; let lastY = 0;
-    overlay.addEventListener('mousedown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+    let dragging = false; 
+    let resizing = false;
+    let resizeHandle = null;
+    let lastX = 0; 
+    let lastY = 0;
+    
+    // Handle resize handles
+    const handles = overlay.querySelectorAll('.resize-handle');
+    handles.forEach(handle => {
+      handle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        resizing = true;
+        resizeHandle = e.target.dataset.handle;
+        lastX = e.clientX;
+        lastY = e.clientY;
+      });
+    });
+    
+    // Handle dragging (moving the crop area)
+    overlay.addEventListener('mousedown', (e) => { 
+      if (resizing) return;
+      dragging = true; 
+      lastX = e.clientX; 
+      lastY = e.clientY; 
+    });
+    
     window.addEventListener('mouseup', () => { 
-      if (dragging && state.crop.active) {
-        // Update preview after drag ends
+      if ((dragging || resizing) && state.crop.active) {
+        // Update preview after drag/resize ends
         drawToPreview(state.imageBitmap);
       }
       dragging = false;
+      resizing = false;
+      resizeHandle = null;
     });
+    
     window.addEventListener('mousemove', (e) => {
-      if (!dragging || !state.crop.active) return;
-      const dx = e.clientX - lastX; const dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
-      // translate crop rectangle in image space proportional to movement on canvas
-      const canvas = state.previewCanvas; const rect = canvas.getBoundingClientRect();
+      if (!state.crop.active) return;
+      
+      const canvas = state.previewCanvas; 
+      const rect = canvas.getBoundingClientRect();
       const scaleX = state.imageBitmap.width / rect.width;
       const scaleY = state.imageBitmap.height / rect.height;
-      state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - state.crop.w, state.crop.x + dx * scaleX));
-      state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - state.crop.h, state.crop.y + dy * scaleY));
-      drawCropOverlay();
+      
+      if (resizing && resizeHandle) {
+        const dx = (e.clientX - lastX) * scaleX;
+        const dy = (e.clientY - lastY) * scaleY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        
+        const ratio = 7/5; // height/width ratio for 5:7
+        const minW = 50;
+        const minH = Math.round(minW * ratio);
+        
+        let newX = state.crop.x;
+        let newY = state.crop.y;
+        let newW = state.crop.w;
+        let newH = state.crop.h;
+        
+        // Handle different resize directions
+        switch (resizeHandle) {
+          case 'se': // bottom-right corner
+            newW = Math.max(minW, Math.min(state.imageBitmap.width - newX, newW + dx));
+            newH = Math.round(newW * ratio);
+            break;
+          case 'sw': // bottom-left corner
+            const potentialW_sw = newW - dx;
+            if (potentialW_sw >= minW && newX + dx >= 0) {
+              newW = potentialW_sw;
+              newX = newX + dx;
+              newH = Math.round(newW * ratio);
+            }
+            break;
+          case 'ne': // top-right corner
+            const potentialH_ne = newH - dy;
+            if (potentialH_ne >= minH && newY + dy >= 0) {
+              newH = potentialH_ne;
+              newY = newY + dy;
+              newW = Math.round(newH / ratio);
+            }
+            break;
+          case 'nw': // top-left corner
+            const potentialW_nw = newW - dx;
+            const potentialH_nw = Math.round(potentialW_nw * ratio);
+            if (potentialW_nw >= minW && newX + dx >= 0) {
+              // Calculate y adjustment to maintain ratio
+              const heightChange = newH - potentialH_nw;
+              if (newY + heightChange >= 0 && potentialH_nw + newY + heightChange <= state.imageBitmap.height) {
+                newW = potentialW_nw;
+                newH = potentialH_nw;
+                newX = newX + dx;
+                newY = newY + heightChange;
+              }
+            }
+            break;
+          case 'e': // right edge
+            newW = Math.max(minW, Math.min(state.imageBitmap.width - newX, newW + dx));
+            newH = Math.round(newW * ratio);
+            break;
+          case 'w': // left edge
+            const potentialW_w = newW - dx;
+            if (potentialW_w >= minW && newX + dx >= 0) {
+              newW = potentialW_w;
+              newX = newX + dx;
+              newH = Math.round(newW * ratio);
+            }
+            break;
+          case 'n': // top edge
+            const potentialH_n = newH - dy;
+            if (potentialH_n >= minH && newY + dy >= 0) {
+              newH = potentialH_n;
+              newY = newY + dy;
+              newW = Math.round(newH / ratio);
+            }
+            break;
+          case 's': // bottom edge
+            newH = Math.max(minH, Math.min(state.imageBitmap.height - newY, newH + dy));
+            newW = Math.round(newH / ratio);
+            break;
+        }
+        
+        // Ensure dimensions stay within image bounds
+        if (newW > state.imageBitmap.width) {
+          newW = state.imageBitmap.width;
+          newH = Math.round(newW * ratio);
+        }
+        if (newH > state.imageBitmap.height) {
+          newH = state.imageBitmap.height;
+          newW = Math.round(newH / ratio);
+        }
+        if (newX + newW > state.imageBitmap.width) {
+          newX = state.imageBitmap.width - newW;
+        }
+        if (newY + newH > state.imageBitmap.height) {
+          newY = state.imageBitmap.height - newH;
+        }
+        
+        // Apply constraints
+        newX = Math.max(0, newX);
+        newY = Math.max(0, newY);
+        
+        state.crop.x = newX;
+        state.crop.y = newY;
+        state.crop.w = newW;
+        state.crop.h = newH;
+        
+        drawCropOverlay();
+      } else if (dragging) {
+        const dx = e.clientX - lastX; 
+        const dy = e.clientY - lastY; 
+        lastX = e.clientX; 
+        lastY = e.clientY;
+        
+        // translate crop rectangle in image space proportional to movement on canvas
+        state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - state.crop.w, state.crop.x + dx * scaleX));
+        state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - state.crop.h, state.crop.y + dy * scaleY));
+        drawCropOverlay();
+      }
     });
+    
     overlay.addEventListener('wheel', (e) => {
       if (!state.crop.active) return;
       e.preventDefault();

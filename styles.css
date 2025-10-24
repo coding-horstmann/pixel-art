@@ -248,6 +248,53 @@ body::after {
   animation: pulse-border 2s ease-in-out infinite;
 }
 
+/* Resize handles */
+.resize-handle {
+  position: absolute;
+  pointer-events: all;
+  background: var(--color-primary);
+  border: 2px solid rgba(0,0,0,0.8);
+  box-shadow: 0 0 12px rgba(0,255,255,0.8);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.resize-handle:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 18px rgba(0,255,255,1);
+  background: var(--color-accent);
+}
+
+/* Corner handles - larger and circular */
+.resize-corner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.resize-handle.nw { top: -8px; left: -8px; cursor: nwse-resize; }
+.resize-handle.ne { top: -8px; right: -8px; cursor: nesw-resize; }
+.resize-handle.sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
+.resize-handle.se { bottom: -8px; right: -8px; cursor: nwse-resize; }
+
+/* Edge handles - smaller and rectangular */
+.resize-edge {
+  background: var(--color-secondary);
+  box-shadow: 0 0 10px rgba(255,20,147,0.8);
+}
+
+.resize-edge:hover {
+  background: var(--color-accent);
+  box-shadow: 0 0 16px rgba(0,255,0,1);
+}
+
+.resize-handle.n { top: -6px; left: 50%; transform: translateX(-50%); width: 40px; height: 12px; cursor: ns-resize; border-radius: 6px; }
+.resize-handle.s { bottom: -6px; left: 50%; transform: translateX(-50%); width: 40px; height: 12px; cursor: ns-resize; border-radius: 6px; }
+.resize-handle.w { left: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 40px; cursor: ew-resize; border-radius: 6px; }
+.resize-handle.e { right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 40px; cursor: ew-resize; border-radius: 6px; }
+
+.resize-handle.n:hover, .resize-handle.s:hover { transform: translateX(-50%) scale(1.2); }
+.resize-handle.w:hover, .resize-handle.e:hover { transform: translateY(-50%) scale(1.2); }
+
 /* Label at top of frame */
 .crop-label {
   position: absolute;
