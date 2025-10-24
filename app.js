@@ -16,6 +16,7 @@
     price: 0,
     history: [],
     cartCount: 0,
+    cart: [], // Array of cart items: { imageDataUrl, size, price, orientation, timestamp }
     crop: {
       active: false,
       // crop rect in image space
@@ -284,14 +285,83 @@
     function openModal() {
       const modal = document.getElementById('checkoutModal');
       modal.classList.add('is-open');
-      // Fill brief
+      // Calculate total
+      const total = state.cart.reduce((sum, item) => sum + item.price, 0);
+      // Fill brief with cart summary
       const mSize = document.getElementById('modalSize');
       const mOrientation = document.getElementById('modalOrientation');
       const mPrice = document.getElementById('modalPrice');
-      if (mSize) mSize.textContent = state.selectedSize || '—';
+      if (mSize) mSize.textContent = `${state.cart.length} Artikel`;
       if (mOrientation) mOrientation.textContent = 'Hochformat';
-      if (mPrice) mPrice.textContent = `€${state.price.toFixed(2)}`;
+      if (mPrice) mPrice.textContent = `€${total.toFixed(2)}`;
+      // Render cart items
+      renderCartItems();
       dispatchOrderUpdated();
+    }
+
+    function renderCartItems() {
+      // Find or create cart items container in modal
+      let cartContainer = document.getElementById('cartItemsContainer');
+      if (!cartContainer) {
+        // Insert before the form
+        const modalForm = document.getElementById('modalForm');
+        cartContainer = document.createElement('div');
+        cartContainer.id = 'cartItemsContainer';
+        cartContainer.className = 'cart-items-container';
+        modalForm.parentNode.insertBefore(cartContainer, modalForm);
+      }
+      // Clear and render
+      cartContainer.innerHTML = '';
+      const modalForm = document.getElementById('modalForm');
+      if (state.cart.length === 0) {
+        cartContainer.innerHTML = '<p class="cart-empty">Ihr Warenkorb ist leer. Bitte erstellen Sie zuerst ein Pixel-Art Poster.</p>';
+        // Hide form when cart is empty
+        if (modalForm) modalForm.style.display = 'none';
+        return;
+      }
+      // Show form when cart has items
+      if (modalForm) modalForm.style.display = 'block';
+      // Calculate total
+      const total = state.cart.reduce((sum, item) => sum + item.price, 0);
+      // Add title and items
+      const titleHTML = `<h4 class="cart-title">Ihre Poster (${state.cart.length})</h4>`;
+      const itemsHTML = state.cart.map((item, index) => {
+        return `
+          <div class="cart-item">
+            <img src="${item.imageDataUrl}" alt="Poster ${index + 1}" class="cart-item-image">
+            <div class="cart-item-info">
+              <div class="cart-item-size">${item.size}</div>
+              <div class="cart-item-orientation">${item.orientation === 'portrait' ? 'Hochformat' : 'Querformat'}</div>
+              <div class="cart-item-price">€${item.price.toFixed(2)}</div>
+            </div>
+            <button class="cart-item-remove" data-index="${index}" type="button" aria-label="Entfernen">✕</button>
+          </div>
+        `;
+      }).join('');
+      const totalHTML = `<div class="cart-total"><span>Gesamtsumme:</span> <strong>€${total.toFixed(2)}</strong></div>`;
+      cartContainer.innerHTML = titleHTML + itemsHTML + totalHTML;
+      // Add event listeners for remove buttons
+      cartContainer.querySelectorAll('.cart-item-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt(e.target.dataset.index, 10);
+          removeCartItem(index);
+        });
+      });
+    }
+
+    function removeCartItem(index) {
+      state.cart.splice(index, 1);
+      state.cartCount = state.cart.length;
+      const cartCount = document.getElementById('cartCount');
+      if (cartCount) cartCount.textContent = String(state.cartCount);
+      // Re-render
+      renderCartItems();
+      // Update totals
+      const total = state.cart.reduce((sum, item) => sum + item.price, 0);
+      const mSize = document.getElementById('modalSize');
+      const mPrice = document.getElementById('modalPrice');
+      if (mSize) mSize.textContent = `${state.cart.length} Artikel`;
+      if (mPrice) mPrice.textContent = `€${total.toFixed(2)}`;
     }
     function closeModal() {
       const modal = document.getElementById('checkoutModal');
@@ -300,13 +370,38 @@
     document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
     cartBtn?.addEventListener('click', openModal);
     addToCartBtn?.addEventListener('click', () => {
-      if (!state.selectedSize) return;
-      state.cartCount += 1;
+      if (!state.selectedSize || !state.previewCanvas) return;
+      // Capture current preview as data URL
+      const imageDataUrl = state.previewCanvas.toDataURL('image/png');
+      // Add to cart
+      state.cart.push({
+        imageDataUrl: imageDataUrl,
+        size: state.selectedSize,
+        price: state.price,
+        orientation: state.orientation,
+        timestamp: Date.now(),
+      });
+      state.cartCount = state.cart.length;
       const cartCount = document.getElementById('cartCount');
       if (cartCount) cartCount.textContent = String(state.cartCount);
+      // Show feedback
+      alert('Bild wurde zum Warenkorb hinzugefügt!');
     });
     buyNowBtn?.addEventListener('click', () => {
-      if (!state.selectedSize) return;
+      if (!state.selectedSize || !state.previewCanvas) return;
+      // Add current image to cart if not already in cart
+      const imageDataUrl = state.previewCanvas.toDataURL('image/png');
+      state.cart.push({
+        imageDataUrl: imageDataUrl,
+        size: state.selectedSize,
+        price: state.price,
+        orientation: state.orientation,
+        timestamp: Date.now(),
+      });
+      state.cartCount = state.cart.length;
+      const cartCount = document.getElementById('cartCount');
+      if (cartCount) cartCount.textContent = String(state.cartCount);
+      // Open checkout
       openModal();
     });
 
