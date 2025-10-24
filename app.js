@@ -213,12 +213,12 @@
           console.log('Image loaded via fallback', `${state.originalImage.width}x${state.originalImage.height}`);
         }
         state.imageBitmap = state.originalImage;
-        // Auto-detect orientation based on image
-        state.orientation = state.imageBitmap.width >= state.imageBitmap.height ? 'landscape' : 'portrait';
-        console.log('Orientation detected', state.orientation);
+        // Always use portrait orientation (5:7 format)
+        state.orientation = 'portrait';
+        console.log('Orientation: portrait (5:7)');
         // Populate sizes dropdown and enable it
         populateSizeDropdown();
-        sizeOrientation.textContent = state.orientation === 'portrait' ? 'Hochformat' : 'Querformat';
+        sizeOrientation.textContent = 'Hochformat';
         sizeSelect.disabled = false;
         // Reveal controls panel now that an image exists
         const controlsPanel = document.getElementById('controlsPanel');
@@ -289,7 +289,7 @@
       const mOrientation = document.getElementById('modalOrientation');
       const mPrice = document.getElementById('modalPrice');
       if (mSize) mSize.textContent = state.selectedSize || '—';
-      if (mOrientation) mOrientation.textContent = state.orientation === 'portrait' ? 'Hochformat' : 'Querformat';
+      if (mOrientation) mOrientation.textContent = 'Hochformat';
       if (mPrice) mPrice.textContent = `€${state.price.toFixed(2)}`;
       dispatchOrderUpdated();
     }
