@@ -293,11 +293,9 @@
           console.log('Image loaded via fallback', `${state.originalImage.width}x${state.originalImage.height}`);
         }
         state.imageBitmap = state.originalImage;
-        // Detect image orientation
-        const isLandscape = state.imageBitmap.width > state.imageBitmap.height;
-        state.orientation = isLandscape ? 'landscape' : 'portrait';
-        console.log('Image orientation detected:', state.orientation, `(${state.imageBitmap.width}x${state.imageBitmap.height})`);
-        // Note: Poster format is always 5:7 portrait, regardless of image orientation
+        // All posters are 5:7 portrait format
+        state.orientation = 'portrait';
+        console.log('Image loaded:', `(${state.imageBitmap.width}x${state.imageBitmap.height})`, '- Poster format: 5:7 portrait');
         // Populate sizes dropdown and enable it
         populateSizeDropdown();
         sizeOrientation.textContent = 'Hochformat (Poster 5:7)';
