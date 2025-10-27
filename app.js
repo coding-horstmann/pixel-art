@@ -737,6 +737,8 @@
       lastY = e.clientY; 
     });
     
+    let updateTimeout = null;
+    
     window.addEventListener('mouseup', () => { 
       if ((dragging || resizing) && state.crop.active) {
         // Update preview after drag/resize ends

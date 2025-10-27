@@ -233,8 +233,8 @@ body::after {
 .crop-overlay.is-hidden { display: none; }
 .crop-overlay.active { display: block; }
 
-/* Dark background outside crop area */
-.crop-mask { position: absolute; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(2px); }
+/* Light background outside crop area - just subtle overlay */
+.crop-mask { position: absolute; inset: 0; background: rgba(0,0,0,.15); backdrop-filter: blur(1px); }
 
 /* Visible frame around the 5:7 area */
 .crop-frame {
