@@ -180,7 +180,7 @@
   }
 
   function processToPreview(image, options) {
-    const { gridSize = 32, paletteSize = 16, dithering = 'none', brightness = 0, outWidth = 400, outHeight = 400, crop } = options;
+    const { gridSize = 32, paletteSize = 16, dithering = 'none', brightness = 0, outWidth = 480, outHeight = 480, crop } = options;
     // 1) Scale image to small grid canvas (maintain aspect)
     const source = crop ? (() => {
       const s = createCanvas(crop.w, crop.h);
