@@ -477,7 +477,7 @@ select:hover {
 /* Modal */
 .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 30; }
 .modal.is-open { display: flex; }
-.modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(2px); }
+.modal-backdrop { position: absolute; inset: 0; background: transparent; backdrop-filter: none; }
 .modal-dialog { position: relative; width: min(900px, 92%); max-height: 90vh; overflow-y: auto; background: rgba(10,10,35,.92); border: 2px solid rgba(0,255,255,.25); border-radius: var(--radius); padding: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.7), 0 0 20px rgba(0,255,255,.15); }
 .modal-close { position: absolute; right: 8px; top: 8px; background: none; color: var(--color-text); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; width: 32px; height: 32px; cursor: pointer; z-index: 10; }
 .order-brief { display: flex; gap: 16px; flex-wrap: wrap; color: var(--color-muted); margin: 8px 0 12px; }
