@@ -450,6 +450,50 @@
     }
     document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
     cartBtn?.addEventListener('click', openModal);
+    
+    // "Jetzt kaufen" Button Handler
+    const buyNowButton = document.getElementById('buyNowButton');
+    buyNowButton?.addEventListener('click', () => {
+      // Validate form first
+      if (!modalForm.checkValidity()) {
+        // Show which fields are invalid
+        const firstInvalid = modalForm.querySelector(':invalid');
+        if (firstInvalid) {
+          firstInvalid.focus();
+          const formError = document.getElementById('formError');
+          if (formError) formError.textContent = 'Bitte alle Pflichtfelder ausfüllen.';
+        }
+        return;
+      }
+      
+      // Check payment method selection
+      const paymentMethod = modalForm.querySelector('input[name="paymentMethod"]:checked');
+      if (!paymentMethod) {
+        const formError = document.getElementById('formError');
+        if (formError) formError.textContent = 'Bitte wähle eine Zahlungsmethode aus.';
+        return;
+      }
+      
+      // Check if cart has items
+      if (state.cart.length === 0) {
+        const formError = document.getElementById('formError');
+        if (formError) formError.textContent = 'Dein Warenkorb ist leer. Bitte füge zuerst Artikel hinzu.';
+        return;
+      }
+      
+      const formError = document.getElementById('formError');
+      if (formError) formError.textContent = '';
+      
+      // TODO: Implementierung der Zahlungsabwicklung
+      // Platzhalter für zukünftige Implementierung
+      if (paymentMethod.value === 'paypal') {
+        showToast('PayPal-Zahlung wird vorbereitet...', '💳', 3000);
+        // Hier würde die PayPal-Integration aufgerufen werden
+      } else if (paymentMethod.value === 'creditcard') {
+        showToast('Kreditkarten-Zahlung wird vorbereitet...', '💳', 3000);
+        // Hier würde die Kreditkarten-Integration aufgerufen werden
+      }
+    });
     addToCartBtn?.addEventListener('click', () => {
       if (!state.selectedSize || !state.previewCanvas || !state.imageBitmap) return;
       
