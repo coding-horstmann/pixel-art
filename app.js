@@ -164,7 +164,8 @@
     }
     console.log('Processing with Pixelate module');
     // Process via Pixelate module
-    // Apply crop if active and dimensions are valid
+    // NOTE: Never apply crop to preview - user should see full image with overlay!
+    // Crop is only applied when: exporting, adding to cart, or buying
     const result = window.Pixelate.processToPreview(bitmap, {
       gridSize: state.pixelResolution,
       paletteSize: state.paletteSize,
@@ -172,7 +173,7 @@
       brightness: state.brightness,
       outWidth: canvas.width,
       outHeight: canvas.height,
-      crop: state.crop && state.crop.active && state.crop.w > 0 && state.crop.h > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
+      crop: null, // Always null for preview - crop overlay shows the selection visually
     });
     console.log('Pixelate processing done, drawing to canvas');
     ctx.drawImage(result.canvas, 0, 0);
