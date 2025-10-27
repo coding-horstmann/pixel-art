@@ -292,12 +292,14 @@
           console.log('Image loaded via fallback', `${state.originalImage.width}x${state.originalImage.height}`);
         }
         state.imageBitmap = state.originalImage;
-        // Always use portrait orientation (5:7 format)
-        state.orientation = 'portrait';
-        console.log('Orientation: portrait (5:7)');
+        // Detect image orientation
+        const isLandscape = state.imageBitmap.width > state.imageBitmap.height;
+        state.orientation = isLandscape ? 'landscape' : 'portrait';
+        console.log('Image orientation detected:', state.orientation, `(${state.imageBitmap.width}x${state.imageBitmap.height})`);
+        // Note: Poster format is always 5:7 portrait, regardless of image orientation
         // Populate sizes dropdown and enable it
         populateSizeDropdown();
-        sizeOrientation.textContent = 'Hochformat';
+        sizeOrientation.textContent = 'Hochformat (Poster 5:7)';
         sizeSelect.disabled = false;
         // Reveal controls panel now that an image exists
         const controlsPanel = document.getElementById('controlsPanel');
@@ -716,6 +718,7 @@
     let resizeHandle = null;
     let lastX = 0; 
     let lastY = 0;
+    let wheelTimeout = null;
     
     // Handle resize handles
     const handles = overlay.querySelectorAll('.resize-handle');
@@ -736,8 +739,6 @@
       lastX = e.clientX; 
       lastY = e.clientY; 
     });
-    
-    let updateTimeout = null;
     
     window.addEventListener('mouseup', () => { 
       if ((dragging || resizing) && state.crop.active) {
@@ -973,8 +974,12 @@
       state.crop.x = newCropX;
       state.crop.y = newCropY;
       drawCropOverlay();
-      // Update preview immediately after zoom
-      drawToPreview(state.imageBitmap);
+      
+      // Debounce preview update to avoid performance issues
+      if (wheelTimeout) clearTimeout(wheelTimeout);
+      wheelTimeout = setTimeout(() => {
+        drawToPreview(state.imageBitmap);
+      }, 300); // Wait 300ms after last wheel event
     }, { passive: false });
   }
 
