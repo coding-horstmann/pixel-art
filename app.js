@@ -311,10 +311,10 @@
           previewCard.classList.remove('is-hidden');
           console.log('previewCard is-hidden removed');
         }
+        console.log('Drawing preview first (to calculate render info)');
+        await drawToPreview(state.imageBitmap);
         console.log('Checking crop compliance');
         ensureCropCompliance();
-        console.log('Drawing preview');
-        await drawToPreview(state.imageBitmap);
         state.history = [];
         console.log('✓ Upload COMPLETE!');
       } catch (err) {
@@ -636,12 +636,27 @@
     // Center the crop area, ensuring it stays within bounds
     state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - cropW, Math.round((state.imageBitmap.width - cropW) / 2)));
     state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - cropH, Math.round((state.imageBitmap.height - cropH) / 2)));
+    
+    console.log('Crop initialized:', { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h });
+    console.log('Render info at crop init:', state.render);
+    
     wireCropInteractions();
+    
+    // Draw the overlay immediately to show correct position
     drawCropOverlay();
+    
     return true;
   }
 
+  let cropInteractionsWired = false;
+  
   function wireCropInteractions() {
+    if (cropInteractionsWired) {
+      console.log('Crop interactions already wired, skipping');
+      return;
+    }
+    cropInteractionsWired = true;
+    
     const overlay = document.getElementById('cropOverlay');
     let dragging = false; 
     let resizing = false;
