@@ -164,6 +164,7 @@
     }
     console.log('Processing with Pixelate module');
     // Process via Pixelate module
+    // Apply crop if active and dimensions are valid
     const result = window.Pixelate.processToPreview(bitmap, {
       gridSize: state.pixelResolution,
       paletteSize: state.paletteSize,
@@ -171,7 +172,7 @@
       brightness: state.brightness,
       outWidth: canvas.width,
       outHeight: canvas.height,
-      crop: state.crop && !state.crop.active && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
+      crop: state.crop && state.crop.active && state.crop.w > 0 && state.crop.h > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
     });
     console.log('Pixelate processing done, drawing to canvas');
     ctx.drawImage(result.canvas, 0, 0);
@@ -449,9 +450,35 @@
     document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
     cartBtn?.addEventListener('click', openModal);
     addToCartBtn?.addEventListener('click', () => {
-      if (!state.selectedSize || !state.previewCanvas) return;
-      // Capture current preview as data URL
-      const imageDataUrl = state.previewCanvas.toDataURL('image/png');
+      if (!state.selectedSize || !state.previewCanvas || !state.imageBitmap) return;
+      
+      // Create a canvas with the crop area (print area) only
+      let imageDataUrl;
+      if (state.crop.active && state.crop.w > 0 && state.crop.h > 0) {
+        // Create a new canvas with the cropped and pixelated version
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = 480;
+        cropCanvas.height = 480;
+        const cropCtx = cropCanvas.getContext('2d');
+        
+        // Process the cropped area
+        const result = window.Pixelate.processToPreview(state.imageBitmap, {
+          gridSize: state.pixelResolution,
+          paletteSize: state.paletteSize,
+          dithering: state.dithering,
+          brightness: state.brightness,
+          outWidth: cropCanvas.width,
+          outHeight: cropCanvas.height,
+          crop: { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h },
+        });
+        
+        cropCtx.drawImage(result.canvas, 0, 0);
+        imageDataUrl = cropCanvas.toDataURL('image/png');
+      } else {
+        // No crop active, use full preview
+        imageDataUrl = state.previewCanvas.toDataURL('image/png');
+      }
+      
       // Add to cart
       state.cart.push({
         imageDataUrl: imageDataUrl,
@@ -464,12 +491,38 @@
       const cartCount = document.getElementById('cartCount');
       if (cartCount) cartCount.textContent = String(state.cartCount);
       // Show feedback
-      showToast('Bild wurde zum Warenkorb hinzugefügt!', '🛒');
+      showToast('Druckbereich wurde zum Warenkorb hinzugefügt!', '🛒');
     });
     buyNowBtn?.addEventListener('click', () => {
-      if (!state.selectedSize || !state.previewCanvas) return;
-      // Add current image to cart if not already in cart
-      const imageDataUrl = state.previewCanvas.toDataURL('image/png');
+      if (!state.selectedSize || !state.previewCanvas || !state.imageBitmap) return;
+      
+      // Create a canvas with the crop area (print area) only
+      let imageDataUrl;
+      if (state.crop.active && state.crop.w > 0 && state.crop.h > 0) {
+        // Create a new canvas with the cropped and pixelated version
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = 480;
+        cropCanvas.height = 480;
+        const cropCtx = cropCanvas.getContext('2d');
+        
+        // Process the cropped area
+        const result = window.Pixelate.processToPreview(state.imageBitmap, {
+          gridSize: state.pixelResolution,
+          paletteSize: state.paletteSize,
+          dithering: state.dithering,
+          brightness: state.brightness,
+          outWidth: cropCanvas.width,
+          outHeight: cropCanvas.height,
+          crop: { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h },
+        });
+        
+        cropCtx.drawImage(result.canvas, 0, 0);
+        imageDataUrl = cropCanvas.toDataURL('image/png');
+      } else {
+        // No crop active, use full preview
+        imageDataUrl = state.previewCanvas.toDataURL('image/png');
+      }
+      
       state.cart.push({
         imageDataUrl: imageDataUrl,
         size: state.selectedSize,
@@ -572,7 +625,7 @@
         cmHeight: o.h,
         orientation: state.orientation,
         dpi: 300,
-        crop: state.crop && state.crop.w > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
+        crop: state.crop && state.crop.active && state.crop.w > 0 && state.crop.h > 0 ? { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h } : null,
       });
       printCanvas.toBlob((blob) => {
         if (!blob) return;
