@@ -234,7 +234,7 @@ body::after {
 .crop-overlay.active { display: block; }
 
 /* Light background outside crop area - just subtle overlay */
-.crop-mask { position: absolute; inset: 0; background: rgba(0,0,0,.15); backdrop-filter: blur(1px); }
+.crop-mask { position: absolute; inset: 0; background: rgba(0,0,0,.05); }
 
 /* Visible frame around the 5:7 area */
 .crop-frame {
