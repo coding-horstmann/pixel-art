@@ -69,9 +69,40 @@
       offsetX: 0,
       offsetY: 0,
     },
+    // Image rendering info in canvas (for crop overlay positioning)
+    render: {
+      dx: 0,    // x offset of image in canvas
+      dy: 0,    // y offset of image in canvas
+      dw: 0,    // rendered width of image in canvas
+      dh: 0,    // rendered height of image in canvas
+    },
   };
 
   function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
+
+  // Calculate how the image is rendered in the canvas (centered, aspect-preserved)
+  function calculateImageRenderInfo(imageWidth, imageHeight, canvasWidth, canvasHeight) {
+    const aspect = imageWidth / imageHeight;
+    let dw, dh;
+    if (aspect >= 1) { 
+      dw = canvasWidth; 
+      dh = Math.round(canvasWidth / aspect); 
+      if (dh > canvasHeight) { 
+        dh = canvasHeight; 
+        dw = Math.round(canvasHeight * aspect); 
+      } 
+    } else { 
+      dh = canvasHeight; 
+      dw = Math.round(canvasHeight * aspect); 
+      if (dw > canvasWidth) { 
+        dw = canvasWidth; 
+        dh = Math.round(canvasWidth / aspect); 
+      } 
+    }
+    const dx = Math.floor((canvasWidth - dw) / 2);
+    const dy = Math.floor((canvasHeight - dh) / 2);
+    return { dx, dy, dw, dh };
+  }
 
   function initHeroCanvas() {
     const canvas = document.getElementById('hero-canvas');
@@ -145,6 +176,9 @@
     console.log('Pixelate processing done, drawing to canvas');
     ctx.drawImage(result.canvas, 0, 0);
     console.log('Canvas drawn, updating history');
+    // Calculate and store render info for crop overlay
+    state.render = calculateImageRenderInfo(bitmap.width, bitmap.height, canvas.width, canvas.height);
+    console.log('Render info:', state.render);
     // Push to history as data URL for undo
     state.history.push(canvas.toDataURL());
     if (state.history.length > 20) state.history.shift();
@@ -556,6 +590,16 @@
 
   function ensureCropCompliance() {
     if (!state.imageBitmap) return;
+    
+    // Calculate render info if not already available
+    if (!state.render.dw || !state.render.dh) {
+      const canvas = state.previewCanvas;
+      if (canvas) {
+        state.render = calculateImageRenderInfo(state.imageBitmap.width, state.imageBitmap.height, canvas.width, canvas.height);
+        console.log('Render info calculated in ensureCropCompliance:', state.render);
+      }
+    }
+    
     // Always use 5:7 ratio (portrait poster format)
     const desired = 5/7;
     const imgRatio = state.imageBitmap.width / state.imageBitmap.height;
@@ -640,12 +684,19 @@
       
       const canvas = state.previewCanvas; 
       const rect = canvas.getBoundingClientRect();
-      const scaleX = state.imageBitmap.width / rect.width;
-      const scaleY = state.imageBitmap.height / rect.height;
+      
+      // Scale factors: canvas pixels to rendered image pixels
+      const canvasScaleX = canvas.width / rect.width;
+      const canvasScaleY = canvas.height / rect.height;
+      
+      // Scale factors: rendered image pixels to original image pixels
+      const imageScaleX = state.imageBitmap.width / state.render.dw;
+      const imageScaleY = state.imageBitmap.height / state.render.dh;
       
       if (resizing && resizeHandle) {
-        const dx = (e.clientX - lastX) * scaleX;
-        const dy = (e.clientY - lastY) * scaleY;
+        // Convert mouse movement to image space coordinates
+        const dx = (e.clientX - lastX) * canvasScaleX * imageScaleX;
+        const dy = (e.clientY - lastY) * canvasScaleY * imageScaleY;
         lastX = e.clientX;
         lastY = e.clientY;
         
@@ -795,9 +846,12 @@
         lastX = e.clientX; 
         lastY = e.clientY;
         
-        // translate crop rectangle in image space proportional to movement on canvas
-        state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - state.crop.w, state.crop.x + dx * scaleX));
-        state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - state.crop.h, state.crop.y + dy * scaleY));
+        // Convert mouse movement to image space coordinates and translate crop rectangle
+        const imageDx = dx * canvasScaleX * imageScaleX;
+        const imageDy = dy * canvasScaleY * imageScaleY;
+        
+        state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - state.crop.w, state.crop.x + imageDx));
+        state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - state.crop.h, state.crop.y + imageDy));
         drawCropOverlay();
       }
     });
@@ -857,14 +911,23 @@
   function drawCropOverlay() {
     const overlay = document.getElementById('cropOverlay');
     if (!overlay || !state.crop.active) return;
-    const canvas = state.previewCanvas; const rect = canvas.getBoundingClientRect();
-    // convert image crop rect to canvas coordinates
-    const scaleX = rect.width / state.imageBitmap.width;
-    const scaleY = rect.height / state.imageBitmap.height;
-    const x = Math.round(state.crop.x * scaleX);
-    const y = Math.round(state.crop.y * scaleY);
-    const w = Math.round(state.crop.w * scaleX);
-    const h = Math.round(state.crop.h * scaleY);
+    const canvas = state.previewCanvas; 
+    const rect = canvas.getBoundingClientRect();
+    
+    // Calculate scale from image space to rendered space in canvas
+    const scaleX = state.render.dw / state.imageBitmap.width;
+    const scaleY = state.render.dh / state.imageBitmap.height;
+    
+    // Transform crop coordinates from image space to canvas space
+    // Include the render offsets (dx, dy) to account for centered image
+    const canvasScaleX = rect.width / canvas.width;
+    const canvasScaleY = rect.height / canvas.height;
+    
+    const x = Math.round((state.render.dx + state.crop.x * scaleX) * canvasScaleX);
+    const y = Math.round((state.render.dy + state.crop.y * scaleY) * canvasScaleY);
+    const w = Math.round((state.crop.w * scaleX) * canvasScaleX);
+    const h = Math.round((state.crop.h * scaleY) * canvasScaleY);
+    
     // create a highlighted window by using CSS clip-path (inverted polygon - dark outside, clear inside)
     overlay.querySelector('.crop-mask').style.clipPath = `polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, ${x}px ${y}px, ${x}px ${y + h}px, ${x + w}px ${y + h}px, ${x + w}px ${y}px, ${x}px ${y}px)`;
     // Position the visible frame
