@@ -734,6 +734,8 @@ select:hover {
 .faq summary { cursor: pointer; font-weight: 700; }
 .faq details[open] { box-shadow: 0 0 12px rgba(0,255,255,.2); }
 .footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: center; }
+.foot-brand { display: flex; flex-direction: column; gap: 6px; }
+.brand-tagline { font-size: 11px; color: var(--color-muted); font-weight: 400; letter-spacing: 0.3px; }
 .footer-payments { display: flex; gap: 16px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
 .footer-payments .pay-icon { height: 24px; opacity: .9; }
 .foot-links { display: flex; gap: 12px; flex-wrap: wrap; }
