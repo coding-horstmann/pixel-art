@@ -719,7 +719,6 @@
     let resizeHandle = null;
     let lastX = 0; 
     let lastY = 0;
-    let wheelTimeout = null;
     
     // Handle resize handles
     const handles = overlay.querySelectorAll('.resize-handle');
@@ -742,10 +741,8 @@
     });
     
     window.addEventListener('mouseup', () => { 
-      if ((dragging || resizing) && state.crop.active) {
-        // Update preview after drag/resize ends
-        drawToPreview(state.imageBitmap);
-      }
+      // Note: No need to redraw preview when crop changes
+      // Preview shows the full pixelated image, crop overlay shows the selection
       dragging = false;
       resizing = false;
       resizeHandle = null;
@@ -976,11 +973,8 @@
       state.crop.y = newCropY;
       drawCropOverlay();
       
-      // Debounce preview update to avoid performance issues
-      if (wheelTimeout) clearTimeout(wheelTimeout);
-      wheelTimeout = setTimeout(() => {
-        drawToPreview(state.imageBitmap);
-      }, 300); // Wait 300ms after last wheel event
+      // Note: No need to redraw preview when zooming crop
+      // Preview shows the full pixelated image, crop overlay shows the selection
     }, { passive: false });
   }
 
