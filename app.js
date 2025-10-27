@@ -458,24 +458,31 @@
       // Create a canvas with the crop area (print area) only
       let imageDataUrl;
       if (state.crop.active && state.crop.w > 0 && state.crop.h > 0) {
-        // Create a new canvas with the cropped and pixelated version
+        // Extract the crop area from the ALREADY PIXELATED preview canvas
+        // This ensures the cart image looks exactly like what the user sees
         const cropCanvas = document.createElement('canvas');
         cropCanvas.width = 480;
         cropCanvas.height = 480;
         const cropCtx = cropCanvas.getContext('2d');
         
-        // Process the cropped area
-        const result = window.Pixelate.processToPreview(state.imageBitmap, {
-          gridSize: state.pixelResolution,
-          paletteSize: state.paletteSize,
-          dithering: state.dithering,
-          brightness: state.brightness,
-          outWidth: cropCanvas.width,
-          outHeight: cropCanvas.height,
-          crop: { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h },
-        });
+        // Calculate scale factors from image space to rendered canvas space
+        const scaleX = state.render.dw / state.imageBitmap.width;
+        const scaleY = state.render.dh / state.imageBitmap.height;
         
-        cropCtx.drawImage(result.canvas, 0, 0);
+        // Transform crop coordinates from image space to canvas space
+        const srcX = state.render.dx + (state.crop.x * scaleX);
+        const srcY = state.render.dy + (state.crop.y * scaleY);
+        const srcW = state.crop.w * scaleX;
+        const srcH = state.crop.h * scaleY;
+        
+        // Copy the crop area from preview canvas to new canvas (scaled to fit)
+        cropCtx.imageSmoothingEnabled = false; // Keep pixels sharp
+        cropCtx.drawImage(
+          state.previewCanvas,
+          srcX, srcY, srcW, srcH,  // source rect in preview canvas
+          0, 0, cropCanvas.width, cropCanvas.height  // destination rect (full canvas)
+        );
+        
         imageDataUrl = cropCanvas.toDataURL('image/png');
       } else {
         // No crop active, use full preview
@@ -502,24 +509,31 @@
       // Create a canvas with the crop area (print area) only
       let imageDataUrl;
       if (state.crop.active && state.crop.w > 0 && state.crop.h > 0) {
-        // Create a new canvas with the cropped and pixelated version
+        // Extract the crop area from the ALREADY PIXELATED preview canvas
+        // This ensures the cart image looks exactly like what the user sees
         const cropCanvas = document.createElement('canvas');
         cropCanvas.width = 480;
         cropCanvas.height = 480;
         const cropCtx = cropCanvas.getContext('2d');
         
-        // Process the cropped area
-        const result = window.Pixelate.processToPreview(state.imageBitmap, {
-          gridSize: state.pixelResolution,
-          paletteSize: state.paletteSize,
-          dithering: state.dithering,
-          brightness: state.brightness,
-          outWidth: cropCanvas.width,
-          outHeight: cropCanvas.height,
-          crop: { x: state.crop.x, y: state.crop.y, w: state.crop.w, h: state.crop.h },
-        });
+        // Calculate scale factors from image space to rendered canvas space
+        const scaleX = state.render.dw / state.imageBitmap.width;
+        const scaleY = state.render.dh / state.imageBitmap.height;
         
-        cropCtx.drawImage(result.canvas, 0, 0);
+        // Transform crop coordinates from image space to canvas space
+        const srcX = state.render.dx + (state.crop.x * scaleX);
+        const srcY = state.render.dy + (state.crop.y * scaleY);
+        const srcW = state.crop.w * scaleX;
+        const srcH = state.crop.h * scaleY;
+        
+        // Copy the crop area from preview canvas to new canvas (scaled to fit)
+        cropCtx.imageSmoothingEnabled = false; // Keep pixels sharp
+        cropCtx.drawImage(
+          state.previewCanvas,
+          srcX, srcY, srcW, srcH,  // source rect in preview canvas
+          0, 0, cropCanvas.width, cropCanvas.height  // destination rect (full canvas)
+        );
+        
         imageDataUrl = cropCanvas.toDataURL('image/png');
       } else {
         // No crop active, use full preview
