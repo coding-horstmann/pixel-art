@@ -741,7 +741,7 @@ select:hover {
 .foot-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .foot-link { color: var(--color-primary); text-decoration: underline; font-weight: 700; }
 .foot-link:hover { color: #7afcff; text-decoration-thickness: 2px; }
-.foot-copy { color: var(--color-muted); font-size: 12px; text-align: right; }
+.foot-copy { color: var(--color-muted); font-size: 12px; text-align: center; grid-column: 1 / -1; }
 
 /* Responsive */
 @media (max-width: 1024px) {
