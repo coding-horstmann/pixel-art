@@ -714,19 +714,10 @@
       }
     }
     
-    // Always use 5:7 ratio (portrait poster format)
-    const desired = 5/7;
-    const imgRatio = state.imageBitmap.width / state.imageBitmap.height;
-    const needsCrop = Math.abs(imgRatio - desired) > 0.01; // tolerance
-    console.log('Crop needed?', needsCrop);
+    // Always show crop overlay - user should always be able to adjust the print area
+    // even if the image already has the correct 5:7 aspect ratio
+    console.log('Always showing crop overlay for user adjustment');
     const overlay = document.getElementById('cropOverlay');
-    if (!needsCrop) {
-      console.log('No crop needed, hiding overlay');
-      overlay?.classList.add('is-hidden');
-      state.crop.active = false;
-      return false;
-    }
-    console.log('Crop needed, showing overlay');
     overlay?.classList.remove('is-hidden');
     overlay?.classList.add('active');
     state.crop.active = true;
