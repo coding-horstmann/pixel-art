@@ -582,9 +582,16 @@
       cropW = state.imageBitmap.width;
       cropH = Math.round(cropW * (7/5));
     }
-    state.crop.w = cropW; state.crop.h = cropH;
-    state.crop.x = Math.max(0, Math.round((state.imageBitmap.width - cropW) / 2));
-    state.crop.y = Math.max(0, Math.round((state.imageBitmap.height - cropH) / 2));
+    // Double-check: if calculated height exceeds image height, recalculate from height
+    if (cropH > state.imageBitmap.height) {
+      cropH = state.imageBitmap.height;
+      cropW = Math.round(cropH * (5/7));
+    }
+    state.crop.w = cropW; 
+    state.crop.h = cropH;
+    // Center the crop area, ensuring it stays within bounds
+    state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - cropW, Math.round((state.imageBitmap.width - cropW) / 2)));
+    state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - cropH, Math.round((state.imageBitmap.height - cropH) / 2)));
     wireCropInteractions();
     drawCropOverlay();
     return true;
@@ -656,60 +663,97 @@
           case 'se': // bottom-right corner
             newW = Math.max(minW, Math.min(state.imageBitmap.width - newX, newW + dx));
             newH = Math.round(newW * ratio);
+            // Ensure height doesn't exceed bottom boundary
+            if (newY + newH > state.imageBitmap.height) {
+              newH = state.imageBitmap.height - newY;
+              newW = Math.round(newH / ratio);
+            }
             break;
           case 'sw': // bottom-left corner
             const potentialW_sw = newW - dx;
-            if (potentialW_sw >= minW && newX + dx >= 0) {
-              newW = potentialW_sw;
-              newX = newX + dx;
-              newH = Math.round(newW * ratio);
+            const potentialX_sw = newX + dx;
+            if (potentialW_sw >= minW && potentialX_sw >= 0) {
+              const potentialH_sw = Math.round(potentialW_sw * ratio);
+              // Check if new height would fit within image bounds
+              if (newY + potentialH_sw <= state.imageBitmap.height) {
+                newW = potentialW_sw;
+                newX = potentialX_sw;
+                newH = potentialH_sw;
+              }
             }
             break;
           case 'ne': // top-right corner
             const potentialH_ne = newH - dy;
-            if (potentialH_ne >= minH && newY + dy >= 0) {
-              newH = potentialH_ne;
-              newY = newY + dy;
-              newW = Math.round(newH / ratio);
+            const potentialY_ne = newY + dy;
+            if (potentialH_ne >= minH && potentialY_ne >= 0) {
+              const potentialW_ne = Math.round(potentialH_ne / ratio);
+              // Check if new width would fit within image bounds
+              if (newX + potentialW_ne <= state.imageBitmap.width) {
+                newH = potentialH_ne;
+                newY = potentialY_ne;
+                newW = potentialW_ne;
+              }
             }
             break;
           case 'nw': // top-left corner
             const potentialW_nw = newW - dx;
-            const potentialH_nw = Math.round(potentialW_nw * ratio);
-            if (potentialW_nw >= minW && newX + dx >= 0) {
-              // Calculate y adjustment to maintain ratio
+            const potentialX_nw = newX + dx;
+            if (potentialW_nw >= minW && potentialX_nw >= 0) {
+              const potentialH_nw = Math.round(potentialW_nw * ratio);
               const heightChange = newH - potentialH_nw;
-              if (newY + heightChange >= 0 && potentialH_nw + newY + heightChange <= state.imageBitmap.height) {
+              const potentialY_nw = newY + heightChange;
+              // Check if new position and dimensions fit within bounds
+              if (potentialY_nw >= 0 && potentialY_nw + potentialH_nw <= state.imageBitmap.height) {
                 newW = potentialW_nw;
                 newH = potentialH_nw;
-                newX = newX + dx;
-                newY = newY + heightChange;
+                newX = potentialX_nw;
+                newY = potentialY_nw;
               }
             }
             break;
           case 'e': // right edge
             newW = Math.max(minW, Math.min(state.imageBitmap.width - newX, newW + dx));
             newH = Math.round(newW * ratio);
+            // Ensure height doesn't exceed image bounds, if so adjust from width
+            if (newY + newH > state.imageBitmap.height) {
+              newH = state.imageBitmap.height - newY;
+              newW = Math.round(newH / ratio);
+            }
             break;
           case 'w': // left edge
             const potentialW_w = newW - dx;
-            if (potentialW_w >= minW && newX + dx >= 0) {
-              newW = potentialW_w;
-              newX = newX + dx;
-              newH = Math.round(newW * ratio);
+            const potentialX_w = newX + dx;
+            if (potentialW_w >= minW && potentialX_w >= 0) {
+              const potentialH_w = Math.round(potentialW_w * ratio);
+              // Check if new height fits within bounds
+              if (newY + potentialH_w <= state.imageBitmap.height) {
+                newW = potentialW_w;
+                newX = potentialX_w;
+                newH = potentialH_w;
+              }
             }
             break;
           case 'n': // top edge
             const potentialH_n = newH - dy;
-            if (potentialH_n >= minH && newY + dy >= 0) {
-              newH = potentialH_n;
-              newY = newY + dy;
-              newW = Math.round(newH / ratio);
+            const potentialY_n = newY + dy;
+            if (potentialH_n >= minH && potentialY_n >= 0) {
+              const potentialW_n = Math.round(potentialH_n / ratio);
+              // Check if new width fits within bounds
+              if (newX + potentialW_n <= state.imageBitmap.width) {
+                newH = potentialH_n;
+                newY = potentialY_n;
+                newW = potentialW_n;
+              }
             }
             break;
           case 's': // bottom edge
             newH = Math.max(minH, Math.min(state.imageBitmap.height - newY, newH + dy));
             newW = Math.round(newH / ratio);
+            // Ensure width doesn't exceed right boundary
+            if (newX + newW > state.imageBitmap.width) {
+              newW = state.imageBitmap.width - newX;
+              newH = Math.round(newW * ratio);
+            }
             break;
         }
         
@@ -722,6 +766,12 @@
           newH = state.imageBitmap.height;
           newW = Math.round(newH / ratio);
         }
+        
+        // Apply position constraints - ensure crop stays fully within image
+        newX = Math.max(0, Math.min(newX, state.imageBitmap.width - newW));
+        newY = Math.max(0, Math.min(newY, state.imageBitmap.height - newH));
+        
+        // Final check: if crop area would exceed image bounds, adjust position
         if (newX + newW > state.imageBitmap.width) {
           newX = state.imageBitmap.width - newW;
         }
@@ -729,7 +779,7 @@
           newY = state.imageBitmap.height - newH;
         }
         
-        // Apply constraints
+        // Ensure no negative positions
         newX = Math.max(0, newX);
         newY = Math.max(0, newY);
         
@@ -780,12 +830,24 @@
         newH = minH;
       }
       
+      // Calculate the center point of current crop area
+      const centerX = state.crop.x + state.crop.w / 2;
+      const centerY = state.crop.y + state.crop.h / 2;
+      
+      // Update dimensions
       state.crop.w = newW;
       state.crop.h = newH;
       
-      // Adjust position to keep within image bounds
-      state.crop.x = Math.max(0, Math.min(state.imageBitmap.width - state.crop.w, state.crop.x));
-      state.crop.y = Math.max(0, Math.min(state.imageBitmap.height - state.crop.h, state.crop.y));
+      // Try to keep the same center point
+      let newCropX = centerX - newW / 2;
+      let newCropY = centerY - newH / 2;
+      
+      // Ensure the crop area stays fully within image bounds
+      newCropX = Math.max(0, Math.min(state.imageBitmap.width - newW, newCropX));
+      newCropY = Math.max(0, Math.min(state.imageBitmap.height - newH, newCropY));
+      
+      state.crop.x = newCropX;
+      state.crop.y = newCropY;
       drawCropOverlay();
       // Update preview immediately after zoom
       drawToPreview(state.imageBitmap);
