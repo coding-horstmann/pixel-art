@@ -164,7 +164,7 @@ body::after {
 .drop-error { color: #ff6b6b; min-height: 20px; }
 
 .preview-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 16px; }
-.canvas-wrap { position: relative; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 8px; }
+.canvas-wrap { position: relative; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 8px; z-index: 10; isolation: isolate; }
 .preview-canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; }
 
 .processing-overlay { 
