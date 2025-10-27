@@ -461,8 +461,8 @@
         // Extract the crop area from the ALREADY PIXELATED preview canvas
         // This ensures the cart image looks exactly like what the user sees
         const cropCanvas = document.createElement('canvas');
-        cropCanvas.width = 480;
-        cropCanvas.height = 480;
+        cropCanvas.width = 400;
+        cropCanvas.height = 400;
         const cropCtx = cropCanvas.getContext('2d');
         
         // Calculate scale factors from image space to rendered canvas space
@@ -512,8 +512,8 @@
         // Extract the crop area from the ALREADY PIXELATED preview canvas
         // This ensures the cart image looks exactly like what the user sees
         const cropCanvas = document.createElement('canvas');
-        cropCanvas.width = 480;
-        cropCanvas.height = 480;
+        cropCanvas.width = 400;
+        cropCanvas.height = 400;
         const cropCtx = cropCanvas.getContext('2d');
         
         // Calculate scale factors from image space to rendered canvas space
