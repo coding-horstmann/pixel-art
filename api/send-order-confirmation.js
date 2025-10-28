@@ -97,7 +97,8 @@ async function sendCustomerEmail({
     orderData,
     cart,
     totalAmount,
-    shopName
+    shopName,
+    shopEmail
   });
 
   // Vorbereitung der Anhänge (Bilder)
@@ -221,7 +222,7 @@ async function sendShopEmail({
 /**
  * Generiert HTML für Kunden-E-Mail
  */
-function generateCustomerEmailHTML({ customerData, orderData, cart, totalAmount, shopName }) {
+function generateCustomerEmailHTML({ customerData, orderData, cart, totalAmount, shopName, shopEmail }) {
   const itemsHTML = cart.map((item, index) => `
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #eee;">Poster ${index + 1}</td>
