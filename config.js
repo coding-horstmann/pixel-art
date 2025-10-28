@@ -1,15 +1,15 @@
 // Konfiguration für Pixel-Poster
-// WICHTIG: Diese Werte werden automatisch durch Vercel Umgebungsvariablen ersetzt
+// WARNUNG: Diese Datei wird beim Build automatisch neu generiert!
 // Für lokale Entwicklung: Trage hier deine Test-Werte ein
 
 window.CONFIG = {
   // PayPal Client-ID
-  // In Vercel: Umgebungsvariable NEXT_PUBLIC_PAYPAL_CLIENT_ID setzen
-  // Der Platzhalter ##PAYPAL_CLIENT_ID## wird beim Deploy automatisch ersetzt
-  PAYPAL_CLIENT_ID: '##PAYPAL_CLIENT_ID##',
+  // Für lokale Entwicklung: Ersetze durch deine Sandbox Client-ID
+  // Für Vercel: Wird automatisch durch NEXT_PUBLIC_PAYPAL_CLIENT_ID ersetzt
+  PAYPAL_CLIENT_ID: '',
   
   // Supabase Konfiguration (für Phase 2)
-  SUPABASE_URL: '##SUPABASE_URL##',
-  SUPABASE_ANON_KEY: '##SUPABASE_ANON_KEY##',
+  SUPABASE_URL: '',
+  SUPABASE_ANON_KEY: '',
 };
 

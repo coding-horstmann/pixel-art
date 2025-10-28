@@ -2,7 +2,7 @@
 
 /**
  * Build-Script für Vercel
- * Ersetzt Platzhalter in config.js durch Umgebungsvariablen
+ * Erstellt config.js mit Umgebungsvariablen
  */
 
 const fs = require('fs');
@@ -10,24 +10,30 @@ const path = require('path');
 
 const configPath = path.join(__dirname, 'config.js');
 
-// Lese config.js
-let configContent = fs.readFileSync(configPath, 'utf8');
+// Hole Umgebungsvariablen
+const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Ersetze Platzhalter durch Umgebungsvariablen
-const replacements = {
-  '##PAYPAL_CLIENT_ID##': process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sandbox-test-id',
-  '##SUPABASE_URL##': process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  '##SUPABASE_ANON_KEY##': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+// Erstelle neue config.js mit tatsächlichen Werten
+const configContent = `// Konfiguration für Pixel-Poster
+// Diese Datei wurde automatisch beim Build generiert
+
+window.CONFIG = {
+  // PayPal Client-ID
+  PAYPAL_CLIENT_ID: '${paypalClientId}',
+  
+  // Supabase Konfiguration (für Phase 2)
+  SUPABASE_URL: '${supabaseUrl}',
+  SUPABASE_ANON_KEY: '${supabaseAnonKey}',
 };
+`;
 
-Object.entries(replacements).forEach(([placeholder, value]) => {
-  configContent = configContent.replace(placeholder, value);
-});
-
-// Schreibe die aktualisierte config.js
+// Schreibe die config.js
 fs.writeFileSync(configPath, configContent, 'utf8');
 
 console.log('✓ Build-Konfiguration erstellt');
-console.log('  PayPal Client-ID:', replacements['##PAYPAL_CLIENT_ID##'] ? 'gesetzt' : 'nicht gesetzt');
-console.log('  Supabase URL:', replacements['##SUPABASE_URL##'] ? 'gesetzt' : 'nicht gesetzt');
+console.log('  PayPal Client-ID:', paypalClientId ? 'gesetzt (' + paypalClientId.substring(0, 10) + '...)' : 'nicht gesetzt');
+console.log('  Supabase URL:', supabaseUrl ? 'gesetzt' : 'nicht gesetzt');
+console.log('  Supabase Anon Key:', supabaseAnonKey ? 'gesetzt' : 'nicht gesetzt');
 
