@@ -167,18 +167,12 @@
     const formError = document.getElementById('formError');
     if (formError) formError.textContent = '';
 
-    console.log('Formular validiert, öffne PayPal-Checkout...');
+    console.log('Formular validiert, zeige PayPal-Button...');
 
-    // Zeige Loading-Hinweis
-    if (window.showToast) {
-      window.showToast('PayPal wird geöffnet...', '⏳', 2000);
-    }
-
-    // Verstecke "Jetzt kaufen" Button sofort
+    // Verstecke "Jetzt kaufen" Button
     const buyNowBtn = document.getElementById('buyNowButton');
     if (buyNowBtn) {
-      buyNowBtn.disabled = true;
-      buyNowBtn.textContent = 'Wird geöffnet...';
+      buyNowBtn.style.display = 'none';
     }
 
     // Container für unsichtbaren Button
@@ -189,41 +183,43 @@
       return;
     }
 
-    // Container bleibt VERSTECKT
-    container.style.display = 'none';
+    // Container wird sichtbar gemacht
+    container.style.display = 'block';
     container.innerHTML = ''; // Leere vorherigen Inhalt
 
-    // Rendere PayPal Button VERSTECKT mit der gewählten Funding-Source
-    // Der Button wird automatisch geklickt
-    await renderPayPalButtonForMethod(paymentMethod, container, true);
+    // Rendere PayPal Button mit der gewählten Funding-Source
+    await renderPayPalButtonForMethod(paymentMethod, container);
   }
 
   // Rendert einen einzelnen PayPal-Button für die gewählte Zahlungsmethode
-  async function renderPayPalButtonForMethod(paymentMethod, container, autoClick = false) {
+  async function renderPayPalButtonForMethod(paymentMethod, container) {
     const paypal = await waitForPayPal();
     if (!paypal) {
       console.error('PayPal SDK nicht verfügbar');
       return;
     }
 
-    console.log('Rendere PayPal-Button für Methode:', paymentMethod, 'autoClick:', autoClick);
+    console.log('Rendere PayPal-Button für Methode:', paymentMethod);
 
-    // Bestimme Funding Source
+    // Bestimme Funding Source und Button Style
     let fundingSource = paypal.FUNDING.PAYPAL;
-    if (paymentMethod === 'card') {
+    let buttonColor = 'gold';
+    
+    if (paymentMethod === 'card' || paymentMethod === 'sepa') {
+      // Kombiniere Kreditkarte + Lastschrift in einen Button
+      // Nutze CARD funding source (PayPal zeigt dann beide Optionen an)
       fundingSource = paypal.FUNDING.CARD;
-    } else if (paymentMethod === 'sepa') {
-      fundingSource = paypal.FUNDING.SEPA;
+      buttonColor = 'black'; // Für card/sepa ist nur black oder white erlaubt
     }
 
-    console.log('Verwende Funding Source:', fundingSource);
+    console.log('Verwende Funding Source:', fundingSource, 'Farbe:', buttonColor);
 
     try {
       const buttonInstance = paypal.Buttons({
         fundingSource: fundingSource,
         style: {
           layout: 'vertical',
-          color: 'gold',
+          color: buttonColor,
           shape: 'rect',
           label: 'pay',
           height: 50
@@ -309,8 +305,6 @@
           const buyNowBtn = document.getElementById('buyNowButton');
           if (buyNowBtn) {
             buyNowBtn.style.display = 'block';
-            buyNowBtn.disabled = false;
-            buyNowBtn.textContent = 'Jetzt kaufen';
           }
           
           // Verstecke PayPal Container
@@ -326,8 +320,6 @@
           const buyNowBtn = document.getElementById('buyNowButton');
           if (buyNowBtn) {
             buyNowBtn.style.display = 'block';
-            buyNowBtn.disabled = false;
-            buyNowBtn.textContent = 'Jetzt kaufen';
           }
           
           // Verstecke PayPal Container
@@ -337,100 +329,21 @@
 
       // Rendere den Button
       await buttonInstance.render(container);
-      console.log('✓ PayPal Button gerendert');
-
-      // Wenn autoClick aktiviert, klicke den Button automatisch
-      if (autoClick) {
-        console.log('Trigger automatischen Klick auf PayPal-Button...');
-        
-        // Warte länger bis Button vollständig gerendert ist
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        console.log('Suche PayPal-Button im Container:', container);
-        console.log('Container HTML:', container.innerHTML);
-        
-        // Versuche verschiedene Selektoren
-        let paypalButton = container.querySelector('div[role="button"]');
-        
-        if (!paypalButton) {
-          console.log('Versuch 1 fehlgeschlagen, versuche anderen Selector...');
-          paypalButton = container.querySelector('.paypal-button');
-        }
-        
-        if (!paypalButton) {
-          console.log('Versuch 2 fehlgeschlagen, versuche iframe...');
-          const iframe = container.querySelector('iframe');
-          if (iframe) {
-            console.log('PayPal iframe gefunden, aber kann nicht direkt geklickt werden');
-            // Zeige den Button stattdessen
-            container.style.display = 'block';
-            const formError = document.getElementById('formError');
-            if (formError) formError.textContent = 'Bitte klicke auf den PayPal-Button unten.';
-            
-            const buyNowBtn = document.getElementById('buyNowButton');
-            if (buyNowBtn) buyNowBtn.style.display = 'none';
-            return;
-          }
-        }
-        
-        if (!paypalButton) {
-          console.log('Versuch 3 fehlgeschlagen, suche alle Buttons...');
-          paypalButton = container.querySelector('button');
-        }
-        
-        if (!paypalButton) {
-          console.log('Versuch 4 fehlgeschlagen, suche alle divs...');
-          const allDivs = container.querySelectorAll('div');
-          console.log('Gefundene divs:', allDivs.length);
-          paypalButton = allDivs[0];
-        }
-        
-        if (paypalButton) {
-          console.log('PayPal-Button gefunden:', paypalButton);
-          console.log('Button Typ:', paypalButton.tagName);
-          console.log('Button Klassen:', paypalButton.className);
-          
-          // Versuche zu klicken
-          try {
-            paypalButton.click();
-            console.log('✓ Klick ausgeführt');
-          } catch (err) {
-            console.error('Fehler beim Klicken:', err);
-            // Zeige den Button stattdessen
-            container.style.display = 'block';
-            const formError = document.getElementById('formError');
-            if (formError) formError.textContent = 'Bitte klicke auf den PayPal-Button unten.';
-            
-            const buyNowBtn = document.getElementById('buyNowButton');
-            if (buyNowBtn) buyNowBtn.style.display = 'none';
-          }
-        } else {
-          console.error('PayPal-Button nicht gefunden nach allen Versuchen');
-          const formError = document.getElementById('formError');
-          if (formError) formError.textContent = 'PayPal konnte nicht geöffnet werden.';
-          
-          // Zeige "Jetzt kaufen" Button wieder
-          const buyNowBtn = document.getElementById('buyNowButton');
-          if (buyNowBtn) {
-            buyNowBtn.style.display = 'block';
-            buyNowBtn.disabled = false;
-            buyNowBtn.textContent = 'Jetzt kaufen';
-          }
-        }
-      }
+      console.log('✓ PayPal Button gerendert und sichtbar');
 
     } catch (error) {
       console.error('Fehler beim Rendern des PayPal Buttons:', error);
       const formError = document.getElementById('formError');
-      if (formError) formError.textContent = 'PayPal-Button konnte nicht geladen werden.';
+      if (formError) formError.textContent = 'PayPal-Button konnte nicht geladen werden: ' + error.message;
       
       // Zeige "Jetzt kaufen" Button wieder
       const buyNowBtn = document.getElementById('buyNowButton');
       if (buyNowBtn) {
         buyNowBtn.style.display = 'block';
-        buyNowBtn.disabled = false;
-        buyNowBtn.textContent = 'Jetzt kaufen';
       }
+      
+      // Verstecke PayPal Container
+      container.style.display = 'none';
     }
   }
 
