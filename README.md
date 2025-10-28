@@ -19,6 +19,7 @@ Eine Web-Anwendung zum Erstellen von Pixel-Art-Postern aus eigenen Fotos. Nutzer
 - 📐 **Druckbereich:** Interaktiver Crop-Editor mit 5:7 Poster-Format
 - 🛒 **Warenkorb-System:** Mehrere Poster gleichzeitig bestellen
 - 💳 **PayPal-Integration:** Sichere Zahlung via PayPal oder Kreditkarte
+- 🗄️ **Supabase-Datenbank:** Automatische Speicherung von Bestellungen und Bildern
 - 🔒 **Datenschutz:** Alle Bilder werden nur lokal im Browser verarbeitet
 - 📱 **Responsive Design:** Funktioniert auf Desktop und Mobile
 
@@ -144,11 +145,14 @@ pixel-art/
 ├── index.html          # Haupt-HTML-Datei
 ├── app.js              # Haupt-App-Logik (Upload, Warenkorb, UI)
 ├── paypal.js           # PayPal-Integration
+├── supabase-client.js  # Supabase-Integration (Bestellungen, Storage)
 ├── pixelate.js         # Pixelisierungs-Engine
 ├── config.js           # Konfiguration (Umgebungsvariablen)
 ├── build.js            # Build-Script (ersetzt Platzhalter)
 ├── styles.css          # Styles
 ├── package.json        # NPM-Konfiguration
+├── supabase-setup.md   # Supabase Setup-Anleitung
+├── env.template        # Template für Umgebungsvariablen
 ├── assets/             # Assets (Bilder, Icons)
 │   └── payments/       # Zahlungs-Icons
 ├── agb.html           # AGB
@@ -164,7 +168,8 @@ pixel-art/
 - **Frontend:** Vanilla JavaScript (ES6+)
 - **Bildverarbeitung:** Canvas API, k-means Clustering
 - **Zahlungsabwicklung:** PayPal JavaScript SDK
-- **Datenbank (geplant):** Supabase
+- **Datenbank:** Supabase (PostgreSQL)
+- **Storage:** Supabase Storage
 - **E-Mail (geplant):** Brevo / Resend / SendGrid
 - **Hosting:** Vercel
 
@@ -178,11 +183,11 @@ pixel-art/
 - [x] Warenkorb-System integrieren
 - [x] Beide Zahlungsarten (PayPal + Kreditkarte) unterstützen
 
-### 🚧 Phase 2: Supabase-Integration (IN PLANUNG)
-- [ ] Datenbank-Schema erstellen
-- [ ] Bestelldaten speichern
-- [ ] Poster-Bilder in Supabase Storage hochladen
-- [ ] Admin-Dashboard für Bestellverwaltung
+### ✅ Phase 2: Supabase-Integration (ABGESCHLOSSEN)
+- [x] Datenbank-Schema erstellen
+- [x] Bestelldaten speichern
+- [x] Poster-Bilder in Supabase Storage hochladen
+- [ ] Admin-Dashboard für Bestellverwaltung (optional)
 
 ### 📧 Phase 3: E-Mail-Versand (IN PLANUNG)
 - [ ] Brevo/Resend API integrieren
@@ -227,6 +232,57 @@ Du musst **keine separate Kreditkarten-Integration** machen! PayPal übernimmt a
 - Nutze die Live-Client-ID
 - PayPal Business Konto muss verifiziert sein
 - URL: `paypal.com`
+
+---
+
+## 🗄️ Supabase-Integration Details
+
+### Wie es funktioniert
+
+Nach erfolgreicher PayPal-Zahlung werden automatisch:
+
+1. **Kundendaten gespeichert** in der `customers` Tabelle
+2. **Bestellung gespeichert** in der `orders` Tabelle (mit PayPal Order ID)
+3. **Poster-Bilder hochgeladen** in Supabase Storage (`poster-images` Bucket)
+4. **Order Items gespeichert** in der `order_items` Tabelle (mit Bild-URLs)
+
+### Datenbank-Schema
+
+**Tabelle: `customers`**
+- Speichert Kundendaten (Name, E-Mail, Adresse)
+- Verknüpft mit Bestellungen
+
+**Tabelle: `orders`**
+- Speichert Bestellungen mit PayPal-Daten
+- Status-Tracking für Fulfillment
+- Verknüpft mit Kunden und Order Items
+
+**Tabelle: `order_items`**
+- Einzelne Poster einer Bestellung
+- Größe, Preis, Ausrichtung
+- Link zum gespeicherten Bild in Storage
+
+**Storage: `poster-images`**
+- Öffentlicher Bucket für Poster-Bilder
+- Organisiert nach Bestellungs-ID
+- Format: `orders/{order-id}/item-{index}_{timestamp}.png`
+
+### Datenbank Setup
+
+Siehe `supabase-setup.md` für eine detaillierte Schritt-für-Schritt-Anleitung.
+
+Kurzfassung:
+1. Erstelle Supabase-Projekt
+2. Führe SQL-Befehle aus `supabase-setup.md` aus
+3. Erstelle `poster-images` Bucket (public)
+4. Setze Umgebungsvariablen in Vercel
+
+### Fehlerbehandlung
+
+Die App ist robust gegen Supabase-Ausfälle:
+- Zahlung funktioniert auch ohne Supabase
+- Fehlermeldung wird geloggt, aber Checkout schlägt nicht fehl
+- Bestellungen können manuell nachgetragen werden via PayPal-Dashboard
 
 ---
 

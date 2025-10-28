@@ -307,6 +307,29 @@
               paymentMethod: paymentMethod
             };
 
+            // Speichere Bestellung in Supabase (falls verfügbar)
+            if (window.SupabaseClient && window.SupabaseClient.saveOrder) {
+              try {
+                console.log('💾 Speichere Bestellung in Supabase...');
+                const savedOrder = await window.SupabaseClient.saveOrder(orderData);
+                console.log('✅ Bestellung in Supabase gespeichert:', savedOrder);
+                
+                // Füge Supabase Order ID zum orderData hinzu
+                if (savedOrder && savedOrder.order) {
+                  orderData.supabaseOrderId = savedOrder.order.id;
+                }
+              } catch (supabaseError) {
+                console.error('⚠️ Fehler beim Speichern in Supabase (Zahlung war aber erfolgreich!):', supabaseError);
+                // Zahlung war erfolgreich, auch wenn Supabase fehlschlug
+                // Zeige Warnung aber breche nicht ab
+                if (window.showToast) {
+                  window.showToast('Zahlung erfolgreich! (Hinweis: Daten konnten nicht gespeichert werden)', '⚠️', 5000);
+                }
+              }
+            } else {
+              console.warn('⚠️ Supabase Client nicht verfügbar - Bestellung wird nicht gespeichert!');
+            }
+
             window.dispatchEvent(new CustomEvent('payment:success', { detail: orderData }));
 
             if (window.showToast) {
