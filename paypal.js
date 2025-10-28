@@ -167,28 +167,52 @@
     const formError = document.getElementById('formError');
     if (formError) formError.textContent = '';
 
-    console.log('Formular validiert, zeige PayPal-Button...');
+    console.log('Formular validiert, öffne PayPal-Pop-up...');
 
-    // Verstecke "Jetzt kaufen" Button
-    const buyNowBtn = document.getElementById('buyNowButton');
-    if (buyNowBtn) {
-      buyNowBtn.style.display = 'none';
+    // Öffne Pop-up mit PayPal-Button
+    openPayPalPopup(paymentMethod);
+  }
+
+  // Öffnet ein Pop-up-Fenster mit dem PayPal-Button
+  function openPayPalPopup(paymentMethod) {
+    // Erstelle Pop-up Overlay wenn nicht vorhanden
+    let popup = document.getElementById('paypal-popup');
+    if (!popup) {
+      popup = document.createElement('div');
+      popup.id = 'paypal-popup';
+      popup.className = 'paypal-popup';
+      popup.innerHTML = `
+        <div class="paypal-popup-overlay"></div>
+        <div class="paypal-popup-content">
+          <button class="paypal-popup-close" aria-label="Schließen">✕</button>
+          <h3 class="paypal-popup-title">Zahlung abschließen</h3>
+          <p class="paypal-popup-text">Bitte klicke auf den Button unten, um deine Zahlung abzuschließen.</p>
+          <div id="paypal-popup-button-container"></div>
+        </div>
+      `;
+      document.body.appendChild(popup);
+
+      // Close Handler
+      const closeBtn = popup.querySelector('.paypal-popup-close');
+      const overlay = popup.querySelector('.paypal-popup-overlay');
+      
+      const closePopup = () => {
+        popup.classList.remove('is-open');
+      };
+      
+      closeBtn.addEventListener('click', closePopup);
+      overlay.addEventListener('click', closePopup);
     }
 
-    // Container für unsichtbaren Button
-    const container = document.getElementById('paypal-button-container');
-    if (!container) {
-      console.error('PayPal Container nicht gefunden');
-      if (formError) formError.textContent = 'PayPal konnte nicht gestartet werden.';
-      return;
+    // Zeige Pop-up
+    popup.classList.add('is-open');
+
+    // Rendere PayPal Button im Pop-up
+    const container = document.getElementById('paypal-popup-button-container');
+    if (container) {
+      container.innerHTML = ''; // Leere vorherigen Inhalt
+      renderPayPalButtonForMethod(paymentMethod, container);
     }
-
-    // Container wird sichtbar gemacht
-    container.style.display = 'block';
-    container.innerHTML = ''; // Leere vorherigen Inhalt
-
-    // Rendere PayPal Button mit der gewählten Funding-Source
-    await renderPayPalButtonForMethod(paymentMethod, container);
   }
 
   // Rendert einen einzelnen PayPal-Button für die gewählte Zahlungsmethode
@@ -230,6 +254,19 @@
           const total = calculateTotal(cart);
           const customerData = getCustomerData();
 
+          // custom_id darf nur 127 Zeichen sein - speichere nur essenzielle Info
+          const orderId = `ORDER-${Date.now()}`;
+          
+          // Speichere Bestelldaten temporär im Window für Phase 2 (Supabase)
+          window.currentOrderData = {
+            orderId: orderId,
+            timestamp: Date.now(),
+            itemCount: cart.length,
+            customer: customerData,
+            paymentMethod: paymentMethod,
+            cart: cart
+          };
+          
         return actions.order.create({
           purchase_units: [{
               amount: {
@@ -243,12 +280,7 @@
                 }
               },
               description: `Pixel-Poster Bestellung (${cart.length} Artikel)`,
-            custom_id: JSON.stringify({
-                timestamp: Date.now(),
-                itemCount: cart.length,
-                customer: customerData,
-                paymentMethod: paymentMethod
-              }),
+              custom_id: orderId, // Nur Order-ID (kurz)
               items: createOrderItems(cart)
             }],
             application_context: {
@@ -284,6 +316,10 @@
             window.pixelPosterCart = [];
             window.dispatchEvent(new CustomEvent('cart:updated'));
 
+            // Schließe Pop-up und Checkout-Modal
+            const popup = document.getElementById('paypal-popup');
+            if (popup) popup.classList.remove('is-open');
+
             setTimeout(() => {
               const modal = document.getElementById('checkoutModal');
               if (modal) modal.classList.remove('is-open');
@@ -301,14 +337,9 @@
           const formError = document.getElementById('formError');
           if (formError) formError.textContent = 'Zahlung wurde abgebrochen.';
           
-          // Zeige "Jetzt kaufen" Button wieder
-          const buyNowBtn = document.getElementById('buyNowButton');
-          if (buyNowBtn) {
-            buyNowBtn.style.display = 'block';
-          }
-          
-          // Verstecke PayPal Container
-          container.style.display = 'none';
+          // Schließe Pop-up
+          const popup = document.getElementById('paypal-popup');
+          if (popup) popup.classList.remove('is-open');
         },
 
         onError: (err) => {
@@ -316,14 +347,9 @@
           const formError = document.getElementById('formError');
           if (formError) formError.textContent = 'Es gab ein Problem mit PayPal.';
           
-          // Zeige "Jetzt kaufen" Button wieder
-          const buyNowBtn = document.getElementById('buyNowButton');
-          if (buyNowBtn) {
-            buyNowBtn.style.display = 'block';
-          }
-          
-          // Verstecke PayPal Container
-          container.style.display = 'none';
+          // Schließe Pop-up
+          const popup = document.getElementById('paypal-popup');
+          if (popup) popup.classList.remove('is-open');
         }
       });
 
@@ -336,14 +362,9 @@
       const formError = document.getElementById('formError');
       if (formError) formError.textContent = 'PayPal-Button konnte nicht geladen werden: ' + error.message;
       
-      // Zeige "Jetzt kaufen" Button wieder
-      const buyNowBtn = document.getElementById('buyNowButton');
-      if (buyNowBtn) {
-        buyNowBtn.style.display = 'block';
-      }
-      
-      // Verstecke PayPal Container
-      container.style.display = 'none';
+      // Schließe Pop-up
+      const popup = document.getElementById('paypal-popup');
+      if (popup) popup.classList.remove('is-open');
     }
   }
 
