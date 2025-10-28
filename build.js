@@ -15,6 +15,9 @@ const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+// Google reCAPTCHA v3
+const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
+
 // Analytics & Marketing Tracking IDs
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
 const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || '';
@@ -33,6 +36,9 @@ window.CONFIG = {
   SUPABASE_URL: '${supabaseUrl}',
   SUPABASE_ANON_KEY: '${supabaseAnonKey}',
   
+  // Google reCAPTCHA v3 (Bot-Schutz)
+  RECAPTCHA_SITE_KEY: '${recaptchaSiteKey}',
+  
   // Analytics & Marketing Tracking IDs
   GA_MEASUREMENT_ID: '${gaMeasurementId}',
   GOOGLE_ADS_ID: '${googleAdsId}',
@@ -48,6 +54,7 @@ console.log('✓ Build-Konfiguration erstellt');
 console.log('  PayPal Client-ID:', paypalClientId ? 'gesetzt (' + paypalClientId.substring(0, 10) + '...)' : 'nicht gesetzt');
 console.log('  Supabase URL:', supabaseUrl ? 'gesetzt' : 'nicht gesetzt');
 console.log('  Supabase Anon Key:', supabaseAnonKey ? 'gesetzt' : 'nicht gesetzt');
+console.log('  reCAPTCHA Site Key:', recaptchaSiteKey ? 'gesetzt (' + recaptchaSiteKey.substring(0, 10) + '...)' : 'nicht gesetzt');
 console.log('  Google Analytics ID:', gaMeasurementId ? 'gesetzt' : 'nicht gesetzt');
 console.log('  Google Ads ID:', googleAdsId ? 'gesetzt' : 'nicht gesetzt');
 console.log('  Facebook Pixel ID:', fbPixelId ? 'gesetzt' : 'nicht gesetzt');
