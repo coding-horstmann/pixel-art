@@ -343,16 +343,69 @@
       if (autoClick) {
         console.log('Trigger automatischen Klick auf PayPal-Button...');
         
-        // Warte kurz bis Button vollständig gerendert ist
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Warte länger bis Button vollständig gerendert ist
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Finde und klicke den PayPal-Button
-        const paypalButton = container.querySelector('div[role="button"]');
+        console.log('Suche PayPal-Button im Container:', container);
+        console.log('Container HTML:', container.innerHTML);
+        
+        // Versuche verschiedene Selektoren
+        let paypalButton = container.querySelector('div[role="button"]');
+        
+        if (!paypalButton) {
+          console.log('Versuch 1 fehlgeschlagen, versuche anderen Selector...');
+          paypalButton = container.querySelector('.paypal-button');
+        }
+        
+        if (!paypalButton) {
+          console.log('Versuch 2 fehlgeschlagen, versuche iframe...');
+          const iframe = container.querySelector('iframe');
+          if (iframe) {
+            console.log('PayPal iframe gefunden, aber kann nicht direkt geklickt werden');
+            // Zeige den Button stattdessen
+            container.style.display = 'block';
+            const formError = document.getElementById('formError');
+            if (formError) formError.textContent = 'Bitte klicke auf den PayPal-Button unten.';
+            
+            const buyNowBtn = document.getElementById('buyNowButton');
+            if (buyNowBtn) buyNowBtn.style.display = 'none';
+            return;
+          }
+        }
+        
+        if (!paypalButton) {
+          console.log('Versuch 3 fehlgeschlagen, suche alle Buttons...');
+          paypalButton = container.querySelector('button');
+        }
+        
+        if (!paypalButton) {
+          console.log('Versuch 4 fehlgeschlagen, suche alle divs...');
+          const allDivs = container.querySelectorAll('div');
+          console.log('Gefundene divs:', allDivs.length);
+          paypalButton = allDivs[0];
+        }
+        
         if (paypalButton) {
-          console.log('PayPal-Button gefunden, klicke automatisch...');
-          paypalButton.click();
+          console.log('PayPal-Button gefunden:', paypalButton);
+          console.log('Button Typ:', paypalButton.tagName);
+          console.log('Button Klassen:', paypalButton.className);
+          
+          // Versuche zu klicken
+          try {
+            paypalButton.click();
+            console.log('✓ Klick ausgeführt');
+          } catch (err) {
+            console.error('Fehler beim Klicken:', err);
+            // Zeige den Button stattdessen
+            container.style.display = 'block';
+            const formError = document.getElementById('formError');
+            if (formError) formError.textContent = 'Bitte klicke auf den PayPal-Button unten.';
+            
+            const buyNowBtn = document.getElementById('buyNowButton');
+            if (buyNowBtn) buyNowBtn.style.display = 'none';
+          }
         } else {
-          console.error('PayPal-Button nicht gefunden für autoClick');
+          console.error('PayPal-Button nicht gefunden nach allen Versuchen');
           const formError = document.getElementById('formError');
           if (formError) formError.textContent = 'PayPal konnte nicht geöffnet werden.';
           
