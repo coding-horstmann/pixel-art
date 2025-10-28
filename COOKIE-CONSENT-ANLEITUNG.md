@@ -7,7 +7,7 @@ Die Pixel-Poster Website verfügt über ein DSGVO-konformes Cookie-Consent-Banne
 ## Features
 
 ✅ **DSGVO-konform** - Erfüllt alle rechtlichen Anforderungen  
-✅ **Granulare Kontrolle** - 4 verschiedene Cookie-Kategorien  
+✅ **Granulare Kontrolle** - 3 Cookie-Kategorien (Notwendig, Analyse, Marketing)  
 ✅ **Persistente Speicherung** - Einstellungen werden in localStorage gespeichert  
 ✅ **Footer-Link** - "Cookie-Einstellungen" zum späteren Ändern  
 ✅ **Versionierung** - Automatische Re-Consent bei Updates  
@@ -22,6 +22,7 @@ Diese Cookies können nicht deaktiviert werden:
 - **Supabase Session** - Speichert Sitzungsdaten
 - **reCAPTCHA** - Schutz vor Spam und Bot-Angriffen
 - **PayPal Integration** - Ermöglicht sichere Zahlungen
+- **Brevo (Sendinblue)** - E-Mail-Versand für Bestellbestätigungen
 
 ### 2. Analyse-Cookies (Optional)
 Helfen zu verstehen, wie Besucher mit der Website interagieren:
@@ -33,10 +34,6 @@ Für personalisierte Werbung und Marketing-Kampagnen:
 - **Google Ads** - Werbeanzeigen und Conversion-Tracking
 - **Facebook Ads** - Facebook/Instagram Werbung
 - **Pinterest Ads** - Pinterest Werbeanzeigen
-
-### 4. E-Mail-Cookies (Optional)
-Für E-Mail-Benachrichtigungen und Bestätigungen:
-- **Brevo (Sendinblue)** - E-Mail-Versand und Tracking
 
 ## Konfiguration der Tracking-IDs
 
@@ -143,6 +140,7 @@ Füge in `datenschutz.html` folgenden Abschnitt hinzu:
     <li><strong>Supabase Session:</strong> Speichert Ihre Sitzungsdaten (Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO)</li>
     <li><strong>reCAPTCHA:</strong> Schutz vor Spam (Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO)</li>
     <li><strong>PayPal Integration:</strong> Sichere Zahlungsabwicklung (Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO)</li>
+    <li><strong>Brevo (Sendinblue):</strong> E-Mail-Versand für Bestellbestätigungen (Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO)</li>
 </ul>
 
 <h3>5.2 Analyse-Cookies</h3>

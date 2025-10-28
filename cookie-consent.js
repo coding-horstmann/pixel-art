@@ -13,7 +13,8 @@
       cookies: [
         { name: 'Supabase Session', description: 'Speichert Ihre Sitzungsdaten', active: true },
         { name: 'reCAPTCHA', description: 'Schutz vor Spam und Bot-Angriffen', active: true },
-        { name: 'PayPal Integration', description: 'Ermöglicht sichere Zahlungen', active: true }
+        { name: 'PayPal Integration', description: 'Ermöglicht sichere Zahlungen', active: true },
+        { name: 'Brevo (Sendinblue)', description: 'E-Mail-Versand für Bestellbestätigungen', active: true }
       ]
     },
     analytics: {
@@ -33,14 +34,6 @@
         { name: 'Google Ads', key: 'gads', active: false },
         { name: 'Facebook Ads', key: 'fbads', active: false },
         { name: 'Pinterest Ads', key: 'pinads', active: false }
-      ]
-    },
-    email: {
-      name: 'E-Mail-Cookies',
-      description: 'Diese Cookies werden für E-Mail-Benachrichtigungen und Bestätigungen verwendet.',
-      required: false,
-      cookies: [
-        { name: 'Brevo (Sendinblue)', key: 'brevo', active: false }
       ]
     }
   };
@@ -390,10 +383,8 @@
       loadPinterestTag();
     }
     
-    // Brevo (Sendinblue) Tracking
-    if (currentConsent.email && !window.sendinblue) {
-      loadBrevoTracking();
-    }
+    // Brevo ist immer aktiv (notwendig für Bestellbestätigungen)
+    // Kein Consent-Check erforderlich
   }
 
   // Google Analytics laden
@@ -485,13 +476,6 @@
     pintrk('page');
     
     console.log('✓ Pinterest Tag geladen');
-  }
-
-  // Brevo (Sendinblue) Tracking laden
-  function loadBrevoTracking() {
-    // Brevo Tracking Code - wird bereits serverseitig verwendet
-    // Hier kannst du optional client-seitiges Tracking hinzufügen
-    console.log('✓ Brevo Tracking aktiviert');
   }
 
   // Füge Cookie-Einstellungs-Link zum Footer hinzu
