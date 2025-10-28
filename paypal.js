@@ -207,9 +207,7 @@
       fundingSource = paypal.FUNDING.SEPA;
     }
 
-    // Prüfe ob Funding Source verfügbar ist
-    const isFundingEligible = paypal.isFundingEligible(fundingSource);
-    console.log('Funding Source eligible?', isFundingEligible);
+    console.log('Verwende Funding Source:', fundingSource);
 
     try {
       paypal.Buttons({
