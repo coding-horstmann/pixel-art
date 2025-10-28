@@ -45,6 +45,9 @@
     }
   }
 
+  // Mache showToast global verfügbar für PayPal-Integration
+  window.showToast = showToast;
+
   const state = {
     originalImage: null,
     imageBitmap: null,
@@ -77,6 +80,9 @@
       dh: 0,    // rendered height of image in canvas
     },
   };
+
+  // Mache Warenkorb global verfügbar für PayPal-Integration
+  window.pixelPosterCart = state.cart;
 
   function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 
@@ -373,6 +379,11 @@
       if (mSize) mSize.textContent = `${state.cart.length} Artikel`;
       if (mOrientation) mOrientation.textContent = 'Hochformat';
       if (mPrice) mPrice.textContent = `€${total.toFixed(2)}`;
+      // Reset PayPal UI
+      const buyNowButton = document.getElementById('buyNowButton');
+      const paypalContainer = document.getElementById('paypal-button-container');
+      if (buyNowButton) buyNowButton.style.display = 'block';
+      if (paypalContainer) paypalContainer.style.display = 'none';
       // Render cart items
       renderCartItems();
       dispatchOrderUpdated();
@@ -431,6 +442,7 @@
     function removeCartItem(index) {
       state.cart.splice(index, 1);
       state.cartCount = state.cart.length;
+      window.pixelPosterCart = state.cart; // Update globale Referenz
       const cartCount = document.getElementById('cartCount');
       if (cartCount) cartCount.textContent = String(state.cartCount);
       // Re-render
@@ -441,6 +453,8 @@
       const mPrice = document.getElementById('modalPrice');
       if (mSize) mSize.textContent = `${state.cart.length} Artikel`;
       if (mPrice) mPrice.textContent = `€${total.toFixed(2)}`;
+      // Dispatch cart update event
+      window.dispatchEvent(new CustomEvent('cart:updated'));
       // Show feedback
       showToast('Artikel wurde entfernt', '🗑️', 2000);
     }
@@ -451,7 +465,7 @@
     document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
     cartBtn?.addEventListener('click', openModal);
     
-    // "Jetzt kaufen" Button Handler
+    // "Jetzt kaufen" Button Handler - Zeigt PayPal Buttons an
     const buyNowButton = document.getElementById('buyNowButton');
     buyNowButton?.addEventListener('click', () => {
       // Validate form first
@@ -466,7 +480,7 @@
         return;
       }
       
-      // Check payment method selection
+      // Check payment method selection (PayPal unterstützt beide: PayPal & Kreditkarte)
       const paymentMethod = modalForm.querySelector('input[name="paymentMethod"]:checked');
       if (!paymentMethod) {
         const formError = document.getElementById('formError');
@@ -484,14 +498,15 @@
       const formError = document.getElementById('formError');
       if (formError) formError.textContent = '';
       
-      // TODO: Implementierung der Zahlungsabwicklung
-      // Platzhalter für zukünftige Implementierung
-      if (paymentMethod.value === 'paypal') {
-        showToast('PayPal-Zahlung wird vorbereitet...', '💳', 3000);
-        // Hier würde die PayPal-Integration aufgerufen werden
-      } else if (paymentMethod.value === 'creditcard') {
-        showToast('Kreditkarten-Zahlung wird vorbereitet...', '💳', 3000);
-        // Hier würde die Kreditkarten-Integration aufgerufen werden
+      // Zeige PayPal Button Container (PayPal übernimmt die Zahlungsabwicklung)
+      const paypalContainer = document.getElementById('paypal-button-container');
+      if (paypalContainer) {
+        // Verstecke "Jetzt kaufen" Button
+        buyNowButton.style.display = 'none';
+        // Zeige PayPal Buttons
+        paypalContainer.style.display = 'block';
+        // Scroll zu den Buttons
+        paypalContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     });
     addToCartBtn?.addEventListener('click', () => {
@@ -541,8 +556,11 @@
         timestamp: Date.now(),
       });
       state.cartCount = state.cart.length;
+      window.pixelPosterCart = state.cart; // Update globale Referenz
       const cartCount = document.getElementById('cartCount');
       if (cartCount) cartCount.textContent = String(state.cartCount);
+      // Dispatch cart update event
+      window.dispatchEvent(new CustomEvent('cart:updated'));
       // Show feedback
       showToast('Druckbereich wurde zum Warenkorb hinzugefügt!', '🛒');
     });
@@ -592,8 +610,11 @@
         timestamp: Date.now(),
       });
       state.cartCount = state.cart.length;
+      window.pixelPosterCart = state.cart; // Update globale Referenz
       const cartCount = document.getElementById('cartCount');
       if (cartCount) cartCount.textContent = String(state.cartCount);
+      // Dispatch cart update event
+      window.dispatchEvent(new CustomEvent('cart:updated'));
       // Open checkout
       openModal();
     });
@@ -601,6 +622,23 @@
     function dispatchOrderUpdated() {
       window.dispatchEvent(new CustomEvent('order:updated', { detail: { size: state.selectedSize, orientation: state.orientation, price: state.price } }));
     }
+
+    // Event-Listener für erfolgreiche Zahlungen
+    window.addEventListener('payment:success', (e) => {
+      console.log('Zahlung erfolgreich, leere Warenkorb:', e.detail);
+      
+      // Warenkorb leeren
+      state.cart = [];
+      state.cartCount = 0;
+      window.pixelPosterCart = state.cart;
+      
+      // UI aktualisieren
+      const cartCount = document.getElementById('cartCount');
+      if (cartCount) cartCount.textContent = '0';
+      
+      // Cart-Update-Event dispatchen
+      window.dispatchEvent(new CustomEvent('cart:updated'));
+    });
   }
 
   let controlsInitialized = false;

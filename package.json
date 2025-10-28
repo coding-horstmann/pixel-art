@@ -1,0 +1,13 @@
+{
+  "name": "pixel-poster",
+  "version": "1.0.0",
+  "description": "Transform Your Photos Into Epic Pixel Art Posters",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js"
+  },
+  "keywords": ["pixel-art", "poster", "image-processing"],
+  "author": "",
+  "license": "ISC"
+}
+
