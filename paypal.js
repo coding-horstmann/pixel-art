@@ -121,7 +121,7 @@
   // Validiert das Checkout-Formular
   function validateCheckoutForm() {
     const form = document.getElementById('modalForm');
-    const formError = document.getElementById('formError');
+  const formError = document.getElementById('formError');
     
     if (!form || !formError) return false;
 
@@ -152,109 +152,81 @@
     return true;
   }
 
-  // Speichere gewählte Zahlungsmethode  
-  let selectedPaymentMethod = 'paypal';
-
   // Initiiert PayPal-Zahlung basierend auf gewählter Zahlungsmethode  
   async function initiatePayPalPayment(paymentMethod) {
-    // Speichere die Auswahl
-    selectedPaymentMethod = paymentMethod;
+    console.log('initiatePayPalPayment aufgerufen mit:', paymentMethod);
     
     // Validiere Formular
     if (!validateCheckoutForm()) {
       const formError = document.getElementById('formError');
       if (formError) formError.textContent = 'Bitte überprüfe deine Eingaben.';
+      console.log('Formular-Validierung fehlgeschlagen');
       return;
     }
 
     const formError = document.getElementById('formError');
     if (formError) formError.textContent = '';
 
-    // Simuliere Click auf versteckten PayPal Button
-    // Der Button wird über die renderPayPalButtons Funktion erstellt
-    // und nutzt die selectedPaymentMethod Variable
+    console.log('Formular validiert, rendere PayPal-Button...');
+
+    // Zeige den Button-Container
     const container = document.getElementById('paypal-button-container');
-    if (container && container.firstChild) {
-      // Trigger den ersten Button (PayPal Button)
-      const button = container.querySelector('div[role="button"]');
-      if (button) {
-        button.click();
-      }
+    if (!container) {
+      console.error('PayPal Container nicht gefunden');
+      if (formError) formError.textContent = 'PayPal konnte nicht gestartet werden.';
+      return;
     }
+
+    // Mache Container sichtbar
+    container.style.display = 'block';
+    container.innerHTML = ''; // Leere vorherigen Inhalt
+
+    // Rendere PayPal Button NEU mit der gewählten Funding-Source
+    await renderPayPalButtonForMethod(paymentMethod, container);
+    
+    // Verstecke "Jetzt kaufen" Button
+    const buyNowBtn = document.getElementById('buyNowButton');
+    if (buyNowBtn) buyNowBtn.style.display = 'none';
   }
 
-  // Rendert PayPal-Buttons (versteckt, nur für Backend-Funktionalität)
-  async function renderPayPalButtons() {
-    if (paypalButtonsRendered) return;
-
+  // Rendert einen einzelnen PayPal-Button für die gewählte Zahlungsmethode
+  async function renderPayPalButtonForMethod(paymentMethod, container) {
     const paypal = await waitForPayPal();
     if (!paypal) {
       console.error('PayPal SDK nicht verfügbar');
       return;
     }
 
-    const container = document.getElementById('paypal-button-container');
-    if (!container) {
-      console.error('PayPal Button Container nicht gefunden');
-      return;
+    console.log('Rendere PayPal-Button für Methode:', paymentMethod);
+
+    // Bestimme Funding Source
+    let fundingSource = paypal.FUNDING.PAYPAL;
+    if (paymentMethod === 'card') {
+      fundingSource = paypal.FUNDING.CARD;
+    } else if (paymentMethod === 'sepa') {
+      fundingSource = paypal.FUNDING.SEPA;
     }
 
-    // Leere Container
-    container.innerHTML = '';
+    // Prüfe ob Funding Source verfügbar ist
+    const isFundingEligible = paypal.isFundingEligible(fundingSource);
+    console.log('Funding Source eligible?', isFundingEligible);
 
     try {
       paypal.Buttons({
+        fundingSource: fundingSource,
         style: {
           layout: 'vertical',
           color: 'gold',
           shape: 'rect',
-          label: 'checkout',
+          label: 'pay',
           height: 50
         },
 
-        // Wird aufgerufen wenn die Buttons initialisiert werden
-        onInit: (data, actions) => {
-          // Initial deaktivieren
-          actions.disable();
-
-          // Bei Formular-Änderungen validieren
-          const form = document.getElementById('modalForm');
-          if (form) {
-            form.addEventListener('input', () => {
-              if (validateCheckoutForm()) {
-                actions.enable();
-              } else {
-                actions.disable();
-              }
-            });
-          }
-
-          // Bei Warenkorb-Updates validieren
-          window.addEventListener('cart:updated', () => {
-            if (validateCheckoutForm()) {
-              actions.enable();
-            } else {
-              actions.disable();
-            }
-          });
-
-          // Initiale Validierung
-          if (validateCheckoutForm()) {
-            actions.enable();
-          }
-        },
-
-        // Erstellt die PayPal-Bestellung
         createOrder: (data, actions) => {
-          if (!validateCheckoutForm()) {
-            return Promise.reject(new Error('Formular nicht gültig'));
-          }
-
           const cart = window.pixelPosterCart || [];
           const total = calculateTotal(cart);
           const customerData = getCustomerData();
 
-          // Erstelle Bestelldetails
           return actions.order.create({
             purchase_units: [{
               amount: {
@@ -271,28 +243,23 @@
               custom_id: JSON.stringify({
                 timestamp: Date.now(),
                 itemCount: cart.length,
-                customer: customerData
+                customer: customerData,
+                paymentMethod: paymentMethod
               }),
               items: createOrderItems(cart)
             }],
             application_context: {
               brand_name: 'Pixel-Poster',
-              shipping_preference: 'NO_SHIPPING' // Wir sammeln Adresse selbst
+              shipping_preference: 'NO_SHIPPING'
             }
           });
         },
 
-        // Wird bei erfolgreicher Zahlung aufgerufen
         onApprove: async (data, actions) => {
-          const formError = document.getElementById('formError');
-          
           try {
-            // Zahlung erfassen
             const order = await actions.order.capture();
-            
             console.log('✓ Zahlung erfolgreich:', order);
 
-            // Bereite Daten für Speicherung vor (wird in Phase 2 implementiert)
             const orderData = {
               orderId: order.id,
               payerId: order.payer.payer_id,
@@ -301,71 +268,69 @@
               currency: order.purchase_units[0].amount.currency_code,
               customerData: getCustomerData(),
               cart: window.pixelPosterCart || [],
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              paymentMethod: paymentMethod
             };
 
-            // Event für erfolgreiche Zahlung auslösen
-            window.dispatchEvent(new CustomEvent('payment:success', { 
-              detail: orderData 
-            }));
+            window.dispatchEvent(new CustomEvent('payment:success', { detail: orderData }));
 
-            // TODO Phase 2: Daten in Supabase speichern
-            // await saveOrderToSupabase(orderData);
-
-            // TODO Phase 3: Bestätigungs-E-Mails versenden
-            // await sendConfirmationEmail(orderData);
-
-            // Zeige Erfolgs-Toast
             if (window.showToast) {
               window.showToast('Zahlung erfolgreich! Vielen Dank für deine Bestellung!', '✓', 5000);
             }
 
-            // Warenkorb leeren
             window.pixelPosterCart = [];
             window.dispatchEvent(new CustomEvent('cart:updated'));
 
-            // Modal schließen nach kurzer Verzögerung
             setTimeout(() => {
               const modal = document.getElementById('checkoutModal');
-              if (modal) {
-                modal.classList.remove('is-open');
-              }
+              if (modal) modal.classList.remove('is-open');
             }, 2000);
 
           } catch (error) {
             console.error('Fehler bei der Zahlungsabwicklung:', error);
-            if (formError) {
-              formError.textContent = 'Es gab ein Problem bei der Zahlungsabwicklung. Bitte versuche es erneut.';
-            }
+            const formError = document.getElementById('formError');
+            if (formError) formError.textContent = 'Es gab ein Problem bei der Zahlungsabwicklung.';
           }
         },
 
-        // Wird aufgerufen wenn die Zahlung abgebrochen wird
-        onCancel: (data) => {
-          console.log('Zahlung abgebrochen:', data);
+        onCancel: () => {
+          console.log('Zahlung abgebrochen');
           const formError = document.getElementById('formError');
-          if (formError) {
-            formError.textContent = 'Zahlung wurde abgebrochen.';
-          }
+          if (formError) formError.textContent = 'Zahlung wurde abgebrochen.';
+          
+          // Zeige "Jetzt kaufen" Button wieder
+          const buyNowBtn = document.getElementById('buyNowButton');
+          if (buyNowBtn) buyNowBtn.style.display = 'block';
+          
+          // Verstecke PayPal Container
+          container.style.display = 'none';
         },
 
-        // Wird bei Fehlern aufgerufen
         onError: (err) => {
           console.error('PayPal Fehler:', err);
           const formError = document.getElementById('formError');
-          if (formError) {
-            formError.textContent = 'Es gab ein Problem mit PayPal. Bitte versuche es erneut oder kontaktiere den Support.';
-          }
+          if (formError) formError.textContent = 'Es gab ein Problem mit PayPal.';
+          
+          // Zeige "Jetzt kaufen" Button wieder
+          const buyNowBtn = document.getElementById('buyNowButton');
+          if (buyNowBtn) buyNowBtn.style.display = 'block';
+          
+          // Verstecke PayPal Container
+          container.style.display = 'none';
         }
-      }).render('#paypal-button-container');
+      }).render(container);
 
-      paypalButtonsRendered = true;
-      console.log('✓ PayPal Buttons gerendert');
+      console.log('✓ PayPal Button gerendert');
 
     } catch (error) {
-      console.error('Fehler beim Rendern der PayPal Buttons:', error);
+      console.error('Fehler beim Rendern des PayPal Buttons:', error);
+      const formError = document.getElementById('formError');
+      if (formError) formError.textContent = 'PayPal-Button konnte nicht geladen werden.';
     }
   }
+
+  // Alte renderPayPalButtons Funktion nicht mehr benötigt - 
+  // Buttons werden dynamisch bei Klick auf "Jetzt kaufen" gerendert
 
   // Initialisiert PayPal
   async function initPayPal() {
@@ -379,12 +344,10 @@
     // Warte auf PayPal Objekt
     await waitForPayPal();
 
-    // Rendere versteckte Buttons sofort
-    await renderPayPalButtons();
-
     // Lausche auf checkout:start Event
     window.addEventListener('checkout:start', (e) => {
       const paymentMethod = e.detail.paymentMethod;
+      console.log('checkout:start Event empfangen, Methode:', paymentMethod);
       initiatePayPalPayment(paymentMethod);
     });
 
