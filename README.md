@@ -59,13 +59,31 @@ Bevor du deployst, musst du die folgenden Umgebungsvariablen in Vercel setzen:
 
 > ⚠️ **WICHTIG:** Verwende für Tests immer die Sandbox-Umgebung! Wechsle zur Live-Umgebung erst wenn alles funktioniert.
 
-#### **Für Supabase-Integration (Phase 2 - SPÄTER):**
+#### **Für Supabase-Integration (Phase 2):**
 
 | Variable Name | Wert | Beschreibung |
 |--------------|------|--------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://xxx.supabase.co` | Deine Supabase Projekt-URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `Dein-Anon-Key` | Supabase Anonymous Key |
 | `SUPABASE_SERVICE_ROLE_KEY` | `Dein-Service-Role-Key` | Supabase Service Role Key (nur Server-seitig) |
+
+#### **Für E-Mail-Versand (Phase 3):**
+
+| Variable Name | Wert | Beschreibung |
+|--------------|------|--------------|
+| `BREVO_API_KEY` | `Dein-Brevo-API-Key` | API Key von Brevo (ehemals Sendinblue) |
+| `SHOP_EMAIL` | `deine-email@domain.de` | Deine E-Mail-Adresse für Shop-Benachrichtigungen |
+| `SHOP_NAME` | `Pixel-Poster` | Name deines Shops (wird in E-Mails angezeigt) |
+
+**So erhältst du den Brevo API-Key:**
+
+1. Gehe zu [brevo.com](https://www.brevo.com) und erstelle einen Account (kostenlos!)
+2. Logge dich ein bei [app.brevo.com](https://app.brevo.com)
+3. Gehe zu **SMTP & API** → **API Keys**
+4. Erstelle einen neuen API Key
+5. Kopiere den Key und setze ihn in Vercel
+
+> 📖 **Detaillierte Anleitung:** Siehe [BREVO-SETUP.md](./BREVO-SETUP.md)
 
 ### 3. Build-Einstellungen
 
@@ -152,7 +170,10 @@ pixel-art/
 ├── styles.css          # Styles
 ├── package.json        # NPM-Konfiguration
 ├── supabase-setup.md   # Supabase Setup-Anleitung
+├── BREVO-SETUP.md      # Brevo E-Mail Setup-Anleitung
 ├── env.template        # Template für Umgebungsvariablen
+├── api/                # Vercel Serverless Functions
+│   └── send-order-confirmation.js  # E-Mail-Versand
 ├── assets/             # Assets (Bilder, Icons)
 │   └── payments/       # Zahlungs-Icons
 ├── agb.html           # AGB
@@ -170,8 +191,8 @@ pixel-art/
 - **Zahlungsabwicklung:** PayPal JavaScript SDK
 - **Datenbank:** Supabase (PostgreSQL)
 - **Storage:** Supabase Storage
-- **E-Mail (geplant):** Brevo / Resend / SendGrid
-- **Hosting:** Vercel
+- **E-Mail:** Brevo (ehemals Sendinblue)
+- **Hosting:** Vercel (mit Serverless Functions)
 
 ---
 
@@ -189,11 +210,12 @@ pixel-art/
 - [x] Poster-Bilder in Supabase Storage hochladen
 - [ ] Admin-Dashboard für Bestellverwaltung (optional)
 
-### 📧 Phase 3: E-Mail-Versand (IN PLANUNG)
-- [ ] Brevo/Resend API integrieren
-- [ ] Bestellbestätigung an Kunden
-- [ ] Bestellbenachrichtigung an Admin
-- [ ] E-Mail-Templates erstellen
+### ✅ Phase 3: E-Mail-Versand (ABGESCHLOSSEN)
+- [x] Brevo API integrieren
+- [x] Bestellbestätigung an Kunden
+- [x] Bestellbenachrichtigung an Admin
+- [x] E-Mail-Templates erstellen (responsive HTML)
+- [x] Poster-Bilder als E-Mail-Anhänge
 
 ---
 

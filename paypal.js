@@ -330,6 +330,48 @@
               console.warn('⚠️ Supabase Client nicht verfügbar - Bestellung wird nicht gespeichert!');
             }
 
+            // Sende Bestellbestätigungs-E-Mails (Kunde + Shop)
+            try {
+              console.log('📧 Sende Bestellbestätigungs-E-Mails...');
+              
+              // Sammle Bilder als Base64-Daten
+              const orderImages = orderData.cart.map(item => item.imageDataUrl);
+              
+              const emailResponse = await fetch('/api/send-order-confirmation', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  orderData: {
+                    orderId: order.id,
+                    payerId: order.payer.payer_id,
+                    timestamp: new Date().toISOString(),
+                    paymentMethod: paymentMethod
+                  },
+                  customerData: orderData.customerData,
+                  cart: orderData.cart.map(item => ({
+                    size: item.size,
+                    price: item.price,
+                    orientation: item.orientation
+                  })),
+                  orderImages: orderImages
+                })
+              });
+
+              if (emailResponse.ok) {
+                const emailResult = await emailResponse.json();
+                console.log('✅ E-Mails erfolgreich versendet:', emailResult);
+              } else {
+                const errorData = await emailResponse.json();
+                console.error('⚠️ E-Mail-Versand fehlgeschlagen (Zahlung war aber erfolgreich!):', errorData);
+                // Nicht abbrechen - Zahlung war erfolgreich!
+              }
+            } catch (emailError) {
+              console.error('⚠️ Fehler beim E-Mail-Versand (Zahlung war aber erfolgreich!):', emailError);
+              // Nicht abbrechen - Zahlung war erfolgreich!
+            }
+
             window.dispatchEvent(new CustomEvent('payment:success', { detail: orderData }));
 
             if (window.showToast) {
