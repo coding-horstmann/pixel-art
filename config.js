@@ -11,5 +11,12 @@ window.CONFIG = {
   // Supabase Konfiguration (für Phase 2)
   SUPABASE_URL: '',
   SUPABASE_ANON_KEY: '',
+  
+  // Analytics & Marketing Tracking IDs
+  // Diese werden vom Build-Script aus Umgebungsvariablen ersetzt
+  GA_MEASUREMENT_ID: '',        // Google Analytics
+  GOOGLE_ADS_ID: '',            // Google Ads
+  FB_PIXEL_ID: '',              // Facebook Pixel
+  PINTEREST_TAG_ID: '',         // Pinterest Tag
 };
 

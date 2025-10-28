@@ -72,6 +72,16 @@
             <div class="foot-copy">© <span id="year"></span> Pixel-Poster. All rights reserved.</div>
         </div>
     </footer>
+    
+    <!-- Cookie Consent -->
+    <script src="./cookie-consent.js" defer></script>
+    <script>
+        // Jahr im Footer aktualisieren
+        document.addEventListener('DOMContentLoaded', () => {
+            const yearElement = document.getElementById('year');
+            if (yearElement) yearElement.textContent = new Date().getFullYear();
+        });
+    </script>
 </body>
 </html>
 
