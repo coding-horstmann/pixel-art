@@ -251,21 +251,52 @@
                     <span class="shipping-text">Kostenloser Versand - Zustellung innerhalb von 5 Werktagen</span>
                 </div>
 
+                <!-- Zahlungsmethode wählen -->
+                <div class="payment-method-section">
+                    <label class="payment-label">Zahlungsmethode*</label>
+                    <div class="payment-options">
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="paypal" required checked>
+                            <span class="payment-option-content">
+                                <img src="./assets/payments/paypal.svg" alt="" class="payment-icon" aria-hidden="true">
+                                <span>PayPal</span>
+                            </span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="card" required>
+                            <span class="payment-option-content">
+                                <img src="./assets/payments/visa.svg" alt="" class="payment-icon-small" aria-hidden="true">
+                                <img src="./assets/payments/mastercard.svg" alt="" class="payment-icon-small" aria-hidden="true">
+                                <span>Kreditkarte</span>
+                            </span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="sepa" required>
+                            <span class="payment-option-content">
+                                <span style="font-size: 18px; margin-right: 8px;">🏦</span>
+                                <span>SEPA-Lastschrift</span>
+                            </span>
+                        </label>
+                    </div>
+                    <p style="text-align: center; color: #888; margin-top: 8px; font-size: 13px;">
+                        Alle Zahlungen werden sicher über PayPal abgewickelt
+                    </p>
+                </div>
+
                 <!-- Rechtliche Hinweise -->
                 <div class="legal-notice">
                     Mit deiner Bestellung erklärst du dich mit unseren <a href="./datenschutz.html" target="_blank" class="legal-link">Datenschutzbestimmungen</a>, <a href="./agb.html" target="_blank" class="legal-link">AGB</a> und der <a href="./widerruf.html" target="_blank" class="legal-link">Widerrufsbelehrung</a> einverstanden.
                 </div>
 
-                <!-- PayPal Zahlungsoptionen -->
-                <div class="payment-info">
-                    <p style="text-align: center; color: #666; margin-bottom: 16px; font-size: 14px;">
-                        <strong>Sichere Zahlung über PayPal:</strong><br>
-                        Wähle zwischen PayPal-Konto oder Kreditkarte/SEPA-Lastschrift
-                    </p>
-                </div>
+                <!-- Jetzt kaufen Button -->
+                <button type="button" id="buyNowButton" class="btn btn-primary btn-purchase btn-buy-now">
+                    Jetzt kaufen
+                </button>
 
-                <div id="paypal-button-container" class="paypal-container" aria-live="polite"></div>
                 <div id="formError" class="form-error" role="alert" aria-live="polite"></div>
+                
+                <!-- Versteckter PayPal Container (wird programmatisch genutzt) -->
+                <div id="paypal-button-container" style="display: none;"></div>
             </form>
         </div>
     </div>

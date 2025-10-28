@@ -460,7 +460,44 @@
     document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
     cartBtn?.addEventListener('click', openModal);
     
-    // Kein "Jetzt kaufen" Button mehr - PayPal Buttons werden direkt angezeigt
+    // "Jetzt kaufen" Button Handler
+    const buyNowButton = document.getElementById('buyNowButton');
+    buyNowButton?.addEventListener('click', () => {
+      // Validiere Formular
+      if (!modalForm.checkValidity()) {
+        const firstInvalid = modalForm.querySelector(':invalid');
+        if (firstInvalid) {
+          firstInvalid.focus();
+          const formError = document.getElementById('formError');
+          if (formError) formError.textContent = 'Bitte alle Pflichtfelder ausfüllen.';
+        }
+        return;
+      }
+      
+      // Prüfe Zahlungsmethode
+      const paymentMethod = modalForm.querySelector('input[name="paymentMethod"]:checked');
+      if (!paymentMethod) {
+        const formError = document.getElementById('formError');
+        if (formError) formError.textContent = 'Bitte wähle eine Zahlungsmethode aus.';
+        return;
+      }
+      
+      // Prüfe Warenkorb
+      if (state.cart.length === 0) {
+        const formError = document.getElementById('formError');
+        if (formError) formError.textContent = 'Dein Warenkorb ist leer. Bitte füge zuerst Artikel hinzu.';
+        return;
+      }
+      
+      const formError = document.getElementById('formError');
+      if (formError) formError.textContent = '';
+      
+      // Trigger PayPal-Zahlung mit gewählter Methode
+      const selectedMethod = paymentMethod.value;
+      window.dispatchEvent(new CustomEvent('checkout:start', { 
+        detail: { paymentMethod: selectedMethod } 
+      }));
+    });
     addToCartBtn?.addEventListener('click', () => {
       if (!state.selectedSize || !state.previewCanvas || !state.imageBitmap) return;
       

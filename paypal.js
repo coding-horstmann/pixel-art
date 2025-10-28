@@ -152,7 +152,38 @@
     return true;
   }
 
-  // Rendert die PayPal-Buttons
+  // Speichere gewählte Zahlungsmethode  
+  let selectedPaymentMethod = 'paypal';
+
+  // Initiiert PayPal-Zahlung basierend auf gewählter Zahlungsmethode  
+  async function initiatePayPalPayment(paymentMethod) {
+    // Speichere die Auswahl
+    selectedPaymentMethod = paymentMethod;
+    
+    // Validiere Formular
+    if (!validateCheckoutForm()) {
+      const formError = document.getElementById('formError');
+      if (formError) formError.textContent = 'Bitte überprüfe deine Eingaben.';
+      return;
+    }
+
+    const formError = document.getElementById('formError');
+    if (formError) formError.textContent = '';
+
+    // Simuliere Click auf versteckten PayPal Button
+    // Der Button wird über die renderPayPalButtons Funktion erstellt
+    // und nutzt die selectedPaymentMethod Variable
+    const container = document.getElementById('paypal-button-container');
+    if (container && container.firstChild) {
+      // Trigger den ersten Button (PayPal Button)
+      const button = container.querySelector('div[role="button"]');
+      if (button) {
+        button.click();
+      }
+    }
+  }
+
+  // Rendert PayPal-Buttons (versteckt, nur für Backend-Funktionalität)
   async function renderPayPalButtons() {
     if (paypalButtonsRendered) return;
 
@@ -348,28 +379,14 @@
     // Warte auf PayPal Objekt
     await waitForPayPal();
 
-    // Rendere Buttons wenn Modal geöffnet wird
-    const modal = document.getElementById('checkoutModal');
-    if (modal) {
-      // Observer für Modal-Öffnung
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class') {
-            if (modal.classList.contains('is-open')) {
-              // Modal wurde geöffnet - rendere Buttons nur einmal
-              if (!paypalButtonsRendered) {
-                renderPayPalButtons();
-              }
-            }
-          }
-        });
-      });
+    // Rendere versteckte Buttons sofort
+    await renderPayPalButtons();
 
-      observer.observe(modal, {
-        attributes: true,
-        attributeFilter: ['class']
-      });
-    }
+    // Lausche auf checkout:start Event
+    window.addEventListener('checkout:start', (e) => {
+      const paymentMethod = e.detail.paymentMethod;
+      initiatePayPalPayment(paymentMethod);
+    });
 
     console.log('✓ PayPal initialisiert');
   }
