@@ -251,39 +251,19 @@
                     <span class="shipping-text">Kostenloser Versand - Zustellung innerhalb von 5 Werktagen</span>
                 </div>
 
-                <!-- Zahlungsmethode -->
-                <div class="payment-method-section">
-                    <label class="payment-label">Zahlungsmethode*</label>
-                    <div class="payment-options">
-                        <label class="payment-option">
-                            <input type="radio" name="paymentMethod" value="paypal" required checked>
-                            <span class="payment-option-content">
-                                <img src="./assets/payments/paypal.svg" alt="" class="payment-icon" aria-hidden="true">
-                                <span>PayPal</span>
-                            </span>
-                        </label>
-                        <label class="payment-option">
-                            <input type="radio" name="paymentMethod" value="creditcard" required>
-                            <span class="payment-option-content">
-                                <img src="./assets/payments/visa.svg" alt="" class="payment-icon-small" aria-hidden="true">
-                                <img src="./assets/payments/mastercard.svg" alt="" class="payment-icon-small" aria-hidden="true">
-                                <span>Kreditkarte</span>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-
                 <!-- Rechtliche Hinweise -->
                 <div class="legal-notice">
                     Mit deiner Bestellung erklärst du dich mit unseren <a href="./datenschutz.html" target="_blank" class="legal-link">Datenschutzbestimmungen</a>, <a href="./agb.html" target="_blank" class="legal-link">AGB</a> und der <a href="./widerruf.html" target="_blank" class="legal-link">Widerrufsbelehrung</a> einverstanden.
                 </div>
 
-                <!-- Jetzt kaufen Button -->
-                <button type="button" id="buyNowButton" class="btn btn-primary btn-purchase btn-buy-now">
-                    Jetzt kaufen
-                </button>
+                <!-- PayPal Zahlungsoptionen -->
+                <div class="payment-info">
+                    <p style="text-align: center; color: #666; margin-bottom: 12px; font-size: 14px;">
+                        💳 Bezahlung per PayPal, Kreditkarte oder SEPA-Lastschrift
+                    </p>
+                </div>
 
-                <div id="paypal-button-container" class="paypal-container" aria-live="polite" style="display: none;"></div>
+                <div id="paypal-button-container" class="paypal-container" aria-live="polite"></div>
                 <div id="formError" class="form-error" role="alert" aria-live="polite"></div>
             </form>
         </div>

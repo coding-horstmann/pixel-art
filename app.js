@@ -379,11 +379,6 @@
       if (mSize) mSize.textContent = `${state.cart.length} Artikel`;
       if (mOrientation) mOrientation.textContent = 'Hochformat';
       if (mPrice) mPrice.textContent = `€${total.toFixed(2)}`;
-      // Reset PayPal UI
-      const buyNowButton = document.getElementById('buyNowButton');
-      const paypalContainer = document.getElementById('paypal-button-container');
-      if (buyNowButton) buyNowButton.style.display = 'block';
-      if (paypalContainer) paypalContainer.style.display = 'none';
       // Render cart items
       renderCartItems();
       dispatchOrderUpdated();
@@ -465,50 +460,7 @@
     document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
     cartBtn?.addEventListener('click', openModal);
     
-    // "Jetzt kaufen" Button Handler - Zeigt PayPal Buttons an
-    const buyNowButton = document.getElementById('buyNowButton');
-    buyNowButton?.addEventListener('click', () => {
-      // Validate form first
-      if (!modalForm.checkValidity()) {
-        // Show which fields are invalid
-        const firstInvalid = modalForm.querySelector(':invalid');
-        if (firstInvalid) {
-          firstInvalid.focus();
-          const formError = document.getElementById('formError');
-          if (formError) formError.textContent = 'Bitte alle Pflichtfelder ausfüllen.';
-        }
-        return;
-      }
-      
-      // Check payment method selection (PayPal unterstützt beide: PayPal & Kreditkarte)
-      const paymentMethod = modalForm.querySelector('input[name="paymentMethod"]:checked');
-      if (!paymentMethod) {
-        const formError = document.getElementById('formError');
-        if (formError) formError.textContent = 'Bitte wähle eine Zahlungsmethode aus.';
-        return;
-      }
-      
-      // Check if cart has items
-      if (state.cart.length === 0) {
-        const formError = document.getElementById('formError');
-        if (formError) formError.textContent = 'Dein Warenkorb ist leer. Bitte füge zuerst Artikel hinzu.';
-        return;
-      }
-      
-      const formError = document.getElementById('formError');
-      if (formError) formError.textContent = '';
-      
-      // Zeige PayPal Button Container (PayPal übernimmt die Zahlungsabwicklung)
-      const paypalContainer = document.getElementById('paypal-button-container');
-      if (paypalContainer) {
-        // Verstecke "Jetzt kaufen" Button
-        buyNowButton.style.display = 'none';
-        // Zeige PayPal Buttons
-        paypalContainer.style.display = 'block';
-        // Scroll zu den Buttons
-        paypalContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    });
+    // Kein "Jetzt kaufen" Button mehr - PayPal Buttons werden direkt angezeigt
     addToCartBtn?.addEventListener('click', () => {
       if (!state.selectedSize || !state.previewCanvas || !state.imageBitmap) return;
       

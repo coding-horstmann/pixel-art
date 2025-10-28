@@ -63,7 +63,7 @@
 
       const script = document.createElement('script');
       script.id = 'paypal-sdk';
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&components=buttons,funding-eligibility&disable-funding=card`;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&components=buttons,funding-eligibility`;
       script.setAttribute('data-sdk-integration-source', 'button-factory');
       
       script.onload = () => {
@@ -132,21 +132,19 @@
 
     if (!customerData.vorname || !customerData.nachname || !customerData.email || 
         !customerData.strasse || !customerData.hausnummer || !customerData.plz || !customerData.ort) {
-      formError.textContent = 'Bitte alle Pflichtfelder ausfüllen.';
+      // Keine Fehlermeldung hier - PayPal Buttons zeigen es selbst an
       return false;
     }
 
     // Validiere E-Mail
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(customerData.email)) {
-      formError.textContent = 'Bitte eine gültige E-Mail-Adresse eingeben.';
       return false;
     }
 
     // Prüfe Warenkorb
     const cart = window.pixelPosterCart || [];
     if (cart.length === 0) {
-      formError.textContent = 'Dein Warenkorb ist leer. Bitte füge zuerst Artikel hinzu.';
       return false;
     }
 
@@ -176,10 +174,10 @@
       paypal.Buttons({
         style: {
           layout: 'vertical',
-          color: 'blue',
+          color: 'gold',
           shape: 'rect',
-          label: 'pay',
-          height: 45
+          label: 'checkout',
+          height: 50
         },
 
         // Wird aufgerufen wenn die Buttons initialisiert werden
@@ -337,7 +335,7 @@
     }
   }
 
-  // Initialisiert PayPal wenn das Checkout-Modal geöffnet wird
+  // Initialisiert PayPal
   async function initPayPal() {
     // Lade PayPal SDK
     const loaded = await loadPayPalSDK();
@@ -357,15 +355,9 @@
         mutations.forEach((mutation) => {
           if (mutation.attributeName === 'class') {
             if (modal.classList.contains('is-open')) {
-              // Modal wurde geöffnet
-              const container = document.getElementById('paypal-button-container');
-              if (container) {
-                container.style.display = 'block';
-                
-                // Rendere Buttons nur einmal
-                if (!paypalButtonsRendered) {
-                  renderPayPalButtons();
-                }
+              // Modal wurde geöffnet - rendere Buttons nur einmal
+              if (!paypalButtonsRendered) {
+                renderPayPalButtons();
               }
             }
           }
