@@ -63,7 +63,8 @@
 
       const script = document.createElement('script');
       script.id = 'paypal-sdk';
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&components=buttons,funding-eligibility`;
+      // enable-funding=card aktiviert den Kreditkarten-Button (inkl. SEPA)
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&components=buttons&enable-funding=card`;
       script.setAttribute('data-sdk-integration-source', 'button-factory');
       
       script.onload = () => {
