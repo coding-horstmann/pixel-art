@@ -14,12 +14,31 @@ export default async function handler(req, res) {
       orderData,
       customerData,
       cart,
-      orderImages // Array von Base64-encoded Bildern
+      orderImages, // Array von Base64-encoded Bildern
+      recaptchaToken // Google reCAPTCHA v3 Token
     } = req.body;
 
     // Validierung
     if (!orderData || !customerData || !cart || cart.length === 0) {
       return res.status(400).json({ error: 'Fehlende Bestelldaten' });
+    }
+
+    // reCAPTCHA v3 Verifizierung (Bot-Schutz)
+    if (recaptchaToken) {
+      const isHuman = await verifyRecaptcha(recaptchaToken);
+      if (!isHuman) {
+        console.warn('⚠️ reCAPTCHA-Verifizierung fehlgeschlagen - möglicher Bot-Angriff');
+        console.warn('Token:', recaptchaToken.substring(0, 20) + '...');
+        return res.status(403).json({ 
+          error: 'Sicherheitsüberprüfung fehlgeschlagen. Bitte versuche es erneut.',
+          code: 'RECAPTCHA_FAILED'
+        });
+      }
+      console.log('✅ reCAPTCHA-Verifizierung erfolgreich - Bestellung ist legitim');
+    } else {
+      console.warn('⚠️ Kein reCAPTCHA-Token erhalten - möglicher Bot oder veralteter Client');
+      // Optional: Bestellung trotzdem durchführen (fail-open) oder blockieren (fail-closed)
+      // Für bessere UX: fail-open (erlauben), aber warnen
     }
 
     // Brevo API-Key aus Umgebungsvariablen
@@ -486,3 +505,81 @@ function generateShopEmailHTML({ customerData, orderData, cart, totalAmount }) {
   `;
 }
 
+/**
+ * Verifiziert reCAPTCHA v3 Token serverseitig
+ * @param {string} token - Das reCAPTCHA-Token vom Client
+ * @returns {Promise<boolean>} true wenn menschlich, false wenn Bot
+ */
+async function verifyRecaptcha(token) {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  
+  if (!secretKey) {
+    console.error('❌ RECAPTCHA_SECRET_KEY nicht in Umgebungsvariablen konfiguriert');
+    // Fail-open: Ohne Secret Key können wir nicht verifizieren, also durchlassen
+    return true;
+  }
+
+  // Prüfe ob Secret Key ein Platzhalter ist
+  if (secretKey.includes('##') || secretKey === '') {
+    console.warn('⚠️ RECAPTCHA_SECRET_KEY ist Platzhalter - Verifizierung übersprungen');
+    return true;
+  }
+
+  try {
+    console.log('🔍 Verifiziere reCAPTCHA-Token bei Google...');
+    
+    // Google reCAPTCHA Verify API
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `secret=${secretKey}&response=${token}`
+    });
+
+    if (!response.ok) {
+      console.error('❌ reCAPTCHA API-Anfrage fehlgeschlagen:', response.status);
+      return true; // Fail-open bei API-Fehler
+    }
+
+    const data = await response.json();
+    
+    console.log('📊 reCAPTCHA-Ergebnis:', {
+      success: data.success,
+      score: data.score,
+      action: data.action,
+      hostname: data.hostname,
+      challenge_ts: data.challenge_ts
+    });
+
+    // reCAPTCHA v3 gibt einen Score von 0.0 (Bot) bis 1.0 (Mensch)
+    if (!data.success) {
+      console.warn('❌ reCAPTCHA-Verifizierung fehlgeschlagen:', data['error-codes']);
+      return false;
+    }
+
+    // Score-basierte Entscheidung
+    const score = data.score;
+    const minScore = 0.5; // Empfohlener Schwellenwert (anpassbar)
+
+    if (score >= minScore) {
+      console.log(`✅ reCAPTCHA-Score: ${score} (>= ${minScore}) - Mensch verifiziert`);
+      return true;
+    } else if (score >= 0.3) {
+      // Grauzone: Score zwischen 0.3 und 0.5
+      console.warn(`⚠️ reCAPTCHA-Score: ${score} - Verdächtig niedrig, aber durchgelassen`);
+      console.warn('💡 Tipp: Manuelle Prüfung der Bestellung empfohlen');
+      return true; // Optional: return false für strikte Kontrolle
+    } else {
+      // Sehr niedriger Score: Wahrscheinlich Bot
+      console.error(`❌ reCAPTCHA-Score: ${score} - Sehr niedrig! Wahrscheinlich Bot`);
+      return false;
+    }
+    
+  } catch (error) {
+    console.error('❌ Fehler bei reCAPTCHA-Verifizierung:', error);
+    // Fail-open: Bei Fehler durchlassen (bessere UX)
+    // Fail-closed wäre: return false
+    return true;
+  }
+}

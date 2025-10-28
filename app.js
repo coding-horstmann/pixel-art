@@ -462,7 +462,7 @@
     
     // "Jetzt kaufen" Button Handler
     const buyNowButton = document.getElementById('buyNowButton');
-    buyNowButton?.addEventListener('click', () => {
+    buyNowButton?.addEventListener('click', async () => {
       // Validiere Formular
       if (!modalForm.checkValidity()) {
         const firstInvalid = modalForm.querySelector(':invalid');
@@ -492,10 +492,32 @@
       const formError = document.getElementById('formError');
       if (formError) formError.textContent = '';
       
-      // Trigger PayPal-Zahlung mit gewählter Methode
+      // Generiere reCAPTCHA-Token (v3 - unsichtbar im Hintergrund)
+      let recaptchaToken = null;
+      if (window.RecaptchaService && window.RecaptchaService.isReady()) {
+        try {
+          console.log('🔐 Generiere reCAPTCHA-Token für Checkout...');
+          recaptchaToken = await window.RecaptchaService.getToken('checkout');
+          if (recaptchaToken) {
+            console.log('✅ reCAPTCHA-Token erfolgreich generiert');
+          } else {
+            console.warn('⚠️ reCAPTCHA-Token konnte nicht generiert werden');
+          }
+        } catch (error) {
+          console.error('❌ Fehler beim Generieren des reCAPTCHA-Tokens:', error);
+          // Fortfahren auch ohne Token (fail-open für bessere UX)
+        }
+      } else {
+        console.warn('⚠️ reCAPTCHA-Service nicht bereit - fahre ohne Bot-Schutz fort');
+      }
+      
+      // Trigger PayPal-Zahlung mit gewählter Methode und reCAPTCHA-Token
       const selectedMethod = paymentMethod.value;
       window.dispatchEvent(new CustomEvent('checkout:start', { 
-        detail: { paymentMethod: selectedMethod } 
+        detail: { 
+          paymentMethod: selectedMethod,
+          recaptchaToken: recaptchaToken
+        } 
       }));
     });
     addToCartBtn?.addEventListener('click', () => {

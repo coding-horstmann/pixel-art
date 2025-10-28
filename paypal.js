@@ -153,8 +153,16 @@
   }
 
   // Initiiert PayPal-Zahlung basierend auf gewählter Zahlungsmethode  
-  async function initiatePayPalPayment(paymentMethod) {
+  async function initiatePayPalPayment(paymentMethod, recaptchaToken = null) {
     console.log('initiatePayPalPayment aufgerufen mit:', paymentMethod);
+    
+    // Speichere reCAPTCHA-Token für späteren Gebrauch
+    window.currentRecaptchaToken = recaptchaToken;
+    if (recaptchaToken) {
+      console.log('✅ reCAPTCHA-Token empfangen:', recaptchaToken.substring(0, 20) + '...');
+    } else {
+      console.warn('⚠️ Kein reCAPTCHA-Token vorhanden');
+    }
     
     // Validiere Formular
     if (!validateCheckoutForm()) {
@@ -264,7 +272,8 @@
             itemCount: cart.length,
             customer: customerData,
             paymentMethod: paymentMethod,
-            cart: cart
+            cart: cart,
+            recaptchaToken: window.currentRecaptchaToken // reCAPTCHA-Token hinzufügen
           };
           
         return actions.order.create({
@@ -355,7 +364,8 @@
                     price: item.price,
                     orientation: item.orientation
                   })),
-                  orderImages: orderImages
+                  orderImages: orderImages,
+                  recaptchaToken: orderData.recaptchaToken || window.currentRecaptchaToken // reCAPTCHA-Token hinzufügen
                 })
               });
 
@@ -451,8 +461,12 @@
     // Lausche auf checkout:start Event
     window.addEventListener('checkout:start', (e) => {
       const paymentMethod = e.detail.paymentMethod;
+      const recaptchaToken = e.detail.recaptchaToken;
       console.log('checkout:start Event empfangen, Methode:', paymentMethod);
-      initiatePayPalPayment(paymentMethod);
+      if (recaptchaToken) {
+        console.log('✅ reCAPTCHA-Token im Event enthalten');
+      }
+      initiatePayPalPayment(paymentMethod, recaptchaToken);
     });
 
     console.log('✓ PayPal initialisiert');

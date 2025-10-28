@@ -6,11 +6,14 @@ window.CONFIG = {
   // PayPal Client-ID
   // Für lokale Entwicklung: Ersetze durch deine Sandbox Client-ID
   // Für Vercel: Wird automatisch durch NEXT_PUBLIC_PAYPAL_CLIENT_ID ersetzt
-  PAYPAL_CLIENT_ID: '',
+  PAYPAL_CLIENT_ID: '##NEXT_PUBLIC_PAYPAL_CLIENT_ID##',
   
   // Supabase Konfiguration (für Phase 2)
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: '',
+  SUPABASE_URL: '##NEXT_PUBLIC_SUPABASE_URL##',
+  SUPABASE_ANON_KEY: '##NEXT_PUBLIC_SUPABASE_ANON_KEY##',
+  
+  // Google reCAPTCHA v3 (Bot-Schutz)
+  RECAPTCHA_SITE_KEY: '##NEXT_PUBLIC_RECAPTCHA_SITE_KEY##',
   
   // Analytics & Marketing Tracking IDs
   // Diese werden vom Build-Script aus Umgebungsvariablen ersetzt
