@@ -106,6 +106,33 @@ body::after {
 .upload-section.section { padding-bottom: 24px; }
 .section-title { font-family: "Press Start 2P", system-ui; font-size: 18px; margin: 0 0 24px; }
 
+/* SEO Content Grid - Two columns on desktop */
+.seo-content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+@media (min-width: 1024px) {
+  .seo-content-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+}
+.seo-column h4 {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+.seo-column h4:first-of-type {
+  margin-top: 0;
+}
+.seo-column p,
+.seo-column ul {
+  margin-bottom: 16px;
+}
+.seo-column ul {
+  padding-left: 20px;
+}
+
 /* Hero */
 .hero-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
 .headline { font-family: "Press Start 2P"; font-size: clamp(22px, 3vw, 36px); line-height: 1.3; margin: 0 0 16px; }
