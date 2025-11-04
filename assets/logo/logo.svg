@@ -1,0 +1,21 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Halftone P Logo in Cyan -->
+  <defs>
+    <pattern id="halftone" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#00FFFF" opacity="0.8"/>
+    </pattern>
+    <pattern id="halftone-dense" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.2" fill="#00FFFF" opacity="0.9"/>
+    </pattern>
+  </defs>
+  
+  <!-- P Letter Outline -->
+  <path d="M 8 6 L 8 34 L 20 34 L 20 24 L 16 24 L 16 16 L 20 16 L 20 6 Z" fill="url(#halftone-dense)"/>
+  
+  <!-- P Letter Fill -->
+  <path d="M 10 8 L 10 14 L 16 14 L 16 8 Z" fill="url(#halftone)" opacity="0.6"/>
+  
+  <!-- P Counter (inner space) -->
+  <path d="M 10 18 L 10 22 L 16 22 L 16 18 Z" fill="url(#halftone)" opacity="0.4"/>
+</svg>
+

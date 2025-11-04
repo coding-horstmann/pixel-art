@@ -106,6 +106,7 @@ body::after {
   padding: 14px 0;
 }
 .brand { display: flex; align-items: center; gap: 12px; }
+.logo-img { display: block; flex-shrink: 0; }
 .brand-title { font-family: "Press Start 2P", system-ui; letter-spacing: 1px; font-size: 18px; }
 .logo-pixel { color: var(--color-primary); text-shadow: var(--shadow-glow); }
 
@@ -815,6 +816,7 @@ select:hover {
 .faq details[open] { box-shadow: 0 0 12px rgba(0,255,255,.2); }
 .footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: start; }
 .foot-brand { display: flex; flex-direction: column; gap: 6px; }
+.logo-img-footer { display: block; margin-bottom: 4px; align-self: flex-start; }
 .brand-tagline { font-size: 11px; color: var(--color-muted); font-weight: 400; letter-spacing: 0.3px; }
 .foot-contact { margin-top: 8px; }
 .foot-contact .foot-link { color: var(--color-muted); font-weight: 400; font-size: 13px; }
