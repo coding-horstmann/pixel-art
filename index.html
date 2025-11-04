@@ -19,6 +19,528 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="./styles.css">
+    
+    <!-- Strukturierte Daten für SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://pixel-poster.com/#organization",
+          "name": "Pixel Poster",
+          "legalName": "Pixel Poster - Niklas Horstmann",
+          "url": "https://pixel-poster.com",
+          "logo": "https://pixel-poster.com/favicon.ico",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+49-174-7205407",
+            "contactType": "customer service",
+            "email": "hello@pixel-poster.com",
+            "availableLanguage": ["de", "en"]
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Ückendorfer Straße 95",
+            "addressLocality": "Gelsenkirchen",
+            "postalCode": "45886",
+            "addressCountry": "DE"
+          },
+          "vatID": "DE350314022",
+          "sameAs": []
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://pixel-poster.com/#website",
+          "url": "https://pixel-poster.com",
+          "name": "Pixel-Poster",
+          "description": "Transform Your Photos Into Epic Pixel Art Posters! Upload an image, customize pixel art settings, and order a stunning poster.",
+          "publisher": {
+            "@id": "https://pixel-poster.com/#organization"
+          },
+          "inLanguage": "de"
+        },
+        {
+          "@type": "Product",
+          "@id": "https://pixel-poster.com/#product-poster-21x29",
+          "name": "Pixel-Art Poster 21 × 29.7 cm",
+          "description": "Personalisierbares Pixel-Art Poster im Format 21 × 29.7 cm. Lade dein eigenes Bild hoch, passe die Pixelisierung an (Auflösung, Farbpalette, Dithering) und bestelle dein individuelles Retro-Kunstwerk.",
+          "category": "Poster",
+          "productID": "poster-21x29",
+          "isCustomizable": true,
+          "additionalProperty": [
+            {
+              "@type": "PropertyValue",
+              "name": "Personalization",
+              "value": "Bild-Upload erforderlich"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Anpassbare Optionen",
+              "value": "Pixel-Auflösung (8-128px), Farbpalette (4-64 Farben), Dithering, Helligkeit"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Produkttyp",
+              "value": "Maßgeschneidert nach Kundenspezifikation"
+            }
+          ],
+          "brand": {
+            "@id": "https://pixel-poster.com/#organization"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "https://pixel-poster.com",
+            "priceCurrency": "EUR",
+            "price": "20.65",
+            "priceValidUntil": "2025-12-31",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "DE"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                },
+                "cutoffTime": "14:00",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 2,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://pixel-poster.com/#product-poster-a3",
+          "name": "Pixel-Art Poster 29.7 × 42 cm (A3)",
+          "description": "Personalisierbares Pixel-Art Poster im Format 29.7 × 42 cm (A3). Lade dein eigenes Bild hoch, passe die Pixelisierung an (Auflösung, Farbpalette, Dithering) und bestelle dein individuelles Retro-Kunstwerk.",
+          "category": "Poster",
+          "productID": "poster-a3",
+          "isCustomizable": true,
+          "additionalProperty": [
+            {
+              "@type": "PropertyValue",
+              "name": "Personalization",
+              "value": "Bild-Upload erforderlich"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Anpassbare Optionen",
+              "value": "Pixel-Auflösung (8-128px), Farbpalette (4-64 Farben), Dithering, Helligkeit"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Produkttyp",
+              "value": "Maßgeschneidert nach Kundenspezifikation"
+            }
+          ],
+          "brand": {
+            "@id": "https://pixel-poster.com/#organization"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "https://pixel-poster.com",
+            "priceCurrency": "EUR",
+            "price": "33.73",
+            "priceValidUntil": "2025-12-31",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "DE"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                },
+                "cutoffTime": "14:00",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 2,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://pixel-poster.com/#product-poster-a2",
+          "name": "Pixel-Art Poster 42 × 59.4 cm (A2)",
+          "description": "Personalisierbares Pixel-Art Poster im Format 42 × 59.4 cm (A2). Lade dein eigenes Bild hoch, passe die Pixelisierung an (Auflösung, Farbpalette, Dithering) und bestelle dein individuelles Retro-Kunstwerk.",
+          "category": "Poster",
+          "productID": "poster-a2",
+          "isCustomizable": true,
+          "additionalProperty": [
+            {
+              "@type": "PropertyValue",
+              "name": "Personalization",
+              "value": "Bild-Upload erforderlich"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Anpassbare Optionen",
+              "value": "Pixel-Auflösung (8-128px), Farbpalette (4-64 Farben), Dithering, Helligkeit"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Produkttyp",
+              "value": "Maßgeschneidert nach Kundenspezifikation"
+            }
+          ],
+          "brand": {
+            "@id": "https://pixel-poster.com/#organization"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "https://pixel-poster.com",
+            "priceCurrency": "EUR",
+            "price": "37.80",
+            "priceValidUntil": "2025-12-31",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "DE"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                },
+                "cutoffTime": "14:00",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 2,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://pixel-poster.com/#product-poster-50x70",
+          "name": "Pixel-Art Poster 50 × 70 cm",
+          "description": "Personalisierbares Pixel-Art Poster im Format 50 × 70 cm. Lade dein eigenes Bild hoch, passe die Pixelisierung an (Auflösung, Farbpalette, Dithering) und bestelle dein individuelles Retro-Kunstwerk.",
+          "category": "Poster",
+          "productID": "poster-50x70",
+          "isCustomizable": true,
+          "additionalProperty": [
+            {
+              "@type": "PropertyValue",
+              "name": "Personalization",
+              "value": "Bild-Upload erforderlich"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Anpassbare Optionen",
+              "value": "Pixel-Auflösung (8-128px), Farbpalette (4-64 Farben), Dithering, Helligkeit"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Produkttyp",
+              "value": "Maßgeschneidert nach Kundenspezifikation"
+            }
+          ],
+          "brand": {
+            "@id": "https://pixel-poster.com/#organization"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "https://pixel-poster.com",
+            "priceCurrency": "EUR",
+            "price": "33.70",
+            "priceValidUntil": "2025-12-31",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "DE"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                },
+                "cutoffTime": "14:00",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 2,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://pixel-poster.com/#product-poster-a1",
+          "name": "Pixel-Art Poster 59.4 × 84.1 cm (A1)",
+          "description": "Personalisierbares Pixel-Art Poster im Format 59.4 × 84.1 cm (A1). Lade dein eigenes Bild hoch, passe die Pixelisierung an (Auflösung, Farbpalette, Dithering) und bestelle dein individuelles Retro-Kunstwerk.",
+          "category": "Poster",
+          "productID": "poster-a1",
+          "isCustomizable": true,
+          "additionalProperty": [
+            {
+              "@type": "PropertyValue",
+              "name": "Personalization",
+              "value": "Bild-Upload erforderlich"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Anpassbare Optionen",
+              "value": "Pixel-Auflösung (8-128px), Farbpalette (4-64 Farben), Dithering, Helligkeit"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Produkttyp",
+              "value": "Maßgeschneidert nach Kundenspezifikation"
+            }
+          ],
+          "brand": {
+            "@id": "https://pixel-poster.com/#organization"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "https://pixel-poster.com",
+            "priceCurrency": "EUR",
+            "price": "50.63",
+            "priceValidUntil": "2025-12-31",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "DE"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                },
+                "cutoffTime": "14:00",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 2,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://pixel-poster.com/#product-poster-a0",
+          "name": "Pixel-Art Poster 84.1 × 118.9 cm (A0)",
+          "description": "Personalisierbares Pixel-Art Poster im Format 84.1 × 118.9 cm (A0). Lade dein eigenes Bild hoch, passe die Pixelisierung an (Auflösung, Farbpalette, Dithering) und bestelle dein individuelles Retro-Kunstwerk.",
+          "category": "Poster",
+          "productID": "poster-a0",
+          "isCustomizable": true,
+          "additionalProperty": [
+            {
+              "@type": "PropertyValue",
+              "name": "Personalization",
+              "value": "Bild-Upload erforderlich"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Anpassbare Optionen",
+              "value": "Pixel-Auflösung (8-128px), Farbpalette (4-64 Farben), Dithering, Helligkeit"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Produkttyp",
+              "value": "Maßgeschneidert nach Kundenspezifikation"
+            }
+          ],
+          "brand": {
+            "@id": "https://pixel-poster.com/#organization"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "https://pixel-poster.com",
+            "priceCurrency": "EUR",
+            "price": "50.63",
+            "priceValidUntil": "2025-12-31",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "EUR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "DE"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                },
+                "cutoffTime": "14:00",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 2,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 3,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            }
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://pixel-poster.com/#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Startseite",
+              "item": "https://pixel-poster.com"
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://pixel-poster.com/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Werden meine Bilder gespeichert?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Nein. Die gesamte Verarbeitung findet clientseitig statt. Deine Bilder verlassen deinen Browser nicht."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Welche Dateiformate kann ich hochladen?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Unterstützt werden PNG und JPEG (bis 50MB)."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Welche Größen gibt es und was kosten sie?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Du kannst zwischen mehreren Formaten von 21×29,7 cm bis A0 wählen. Die Preise werden direkt an der Größenwahl angezeigt."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Wie erfolgt die Bezahlung?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Per PayPal. Nach Eingabe deiner Daten im Checkout-Dialog wirst du zu PayPal geleitet."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Wie lange dauert der Versand?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Der Druck startet nach Zahlungseingang. Mit Zustellung kannst du in der Regel innerhalb weniger Werktage rechnen."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
 </head>
 <body>
     <a class="skip-link" href="#main">Skip to content</a>
