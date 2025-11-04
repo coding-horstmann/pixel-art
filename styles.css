@@ -95,7 +95,7 @@ body::after {
 
 .site-header {
   position: sticky; 
-  top: 0; 
+  top: 35px; 
   z-index: 20;
   backdrop-filter: blur(8px);
   background: rgba(10, 10, 35, 0.7);
