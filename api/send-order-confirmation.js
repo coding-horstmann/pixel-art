@@ -143,7 +143,7 @@ async function sendCustomerEmail({
         name: `${customerData.vorname} ${customerData.nachname}`
       }
     ],
-    subject: `Bestellbestätigung - Deine Pixel-Poster sind in Produktion! 🎨`,
+    subject: `Bestellbestätigung - Pixel Poster`,
     htmlContent: htmlContent,
     attachment: attachments
   };
@@ -267,8 +267,9 @@ function generateCustomerEmailHTML({ customerData, orderData, cart, totalAmount,
           
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px;">🎨 ${shopName}</h1>
+            <td style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 20, 147, 0.2) 100%), #0A0A23; padding: 40px 30px; text-align: center;">
+              <img src="https://pixel-poster.com/android-chrome-192x192.png" alt="${shopName}" style="width: 64px; height: 64px; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;">
+              <h1 style="margin: 0; color: #00FFFF; font-size: 28px; text-shadow: 0 0 12px rgba(0, 255, 255, 0.6);">${shopName}</h1>
               <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 16px; opacity: 0.9;">Deine Bestellung ist eingegangen!</p>
             </td>
           </tr>
@@ -279,9 +280,6 @@ function generateCustomerEmailHTML({ customerData, orderData, cart, totalAmount,
               <h2 style="margin: 0 0 20px 0; color: #333; font-size: 24px;">Hallo ${customerData.vorname}! 👋</h2>
               <p style="margin: 0 0 15px 0; color: #555; font-size: 16px; line-height: 1.6;">
                 Vielen Dank für deine Bestellung! Wir haben deine Pixel-Art Poster erhalten und machen uns sofort an die Produktion.
-              </p>
-              <p style="margin: 0 0 15px 0; color: #555; font-size: 16px; line-height: 1.6;">
-                Deine individuell erstellten Poster findest du als Anhang dieser E-Mail. 
               </p>
             </td>
           </tr>
@@ -351,6 +349,11 @@ function generateCustomerEmailHTML({ customerData, orderData, cart, totalAmount,
             <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #eee;">
               <p style="margin: 0 0 10px 0; color: #888; font-size: 14px;">
                 Bei Fragen erreichst du uns jederzeit unter <a href="mailto:${shopEmail}" style="color: #667eea; text-decoration: none;">${shopEmail}</a>
+              </p>
+              <p style="margin: 0 0 10px 0; color: #888; font-size: 12px;">
+                <a href="https://pixel-poster.com/agb.html" style="color: #667eea; text-decoration: none; margin: 0 8px;">AGB</a>
+                <span style="color: #ccc;">|</span>
+                <a href="https://pixel-poster.com/widerruf.html" style="color: #667eea; text-decoration: none; margin: 0 8px;">Widerrufsbelehrung</a>
               </p>
               <p style="margin: 0; color: #aaa; font-size: 12px;">
                 © ${new Date().getFullYear()} ${shopName} - Transform Your Photos Into Epic Pixel Art!
