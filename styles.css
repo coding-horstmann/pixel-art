@@ -793,12 +793,14 @@ select:hover {
 .faq details { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; }
 .faq summary { cursor: pointer; font-weight: 700; }
 .faq details[open] { box-shadow: 0 0 12px rgba(0,255,255,.2); }
-.footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: center; }
+.footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: start; }
 .foot-brand { display: flex; flex-direction: column; gap: 6px; }
 .brand-tagline { font-size: 11px; color: var(--color-muted); font-weight: 400; letter-spacing: 0.3px; }
-.footer-payments { display: flex; gap: 16px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+.foot-contact { margin-top: 8px; }
+.foot-contact .foot-link { color: var(--color-muted); font-weight: 400; font-size: 13px; }
+.footer-payments { display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .footer-payments .pay-icon { height: 24px; opacity: .9; }
-.foot-links { display: flex; gap: 12px; flex-wrap: wrap; }
+.foot-links { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
 .foot-link { color: var(--color-primary); text-decoration: underline; font-weight: 700; }
 .foot-link:hover { color: #7afcff; text-decoration-thickness: 2px; }
 .foot-copy { color: var(--color-muted); font-size: 12px; text-align: center; grid-column: 1 / -1; }
