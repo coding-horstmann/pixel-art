@@ -106,21 +106,15 @@ body::after {
 .upload-section.section { padding-bottom: 24px; }
 .section-title { font-family: "Press Start 2P", system-ui; font-size: 18px; margin: 0 0 24px; }
 
-/* SEO Cards Grid - Card-based layout */
+/* SEO Cards Grid - Two equal cards */
 .seo-cards-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 24px;
 }
 @media (min-width: 768px) {
   .seo-cards-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-}
-@media (min-width: 1024px) {
-  .seo-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
   }
 }
@@ -129,8 +123,11 @@ body::after {
   background: rgba(255, 255, 255, .04);
   border: 1px solid rgba(255, 255, 255, .08);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  height: 100%;
 }
 .seo-card:hover {
   transform: translateY(-2px);
@@ -138,43 +135,23 @@ body::after {
   border-color: rgba(255, 255, 255, .15);
 }
 
-.seo-card-large {
-  grid-column: span 1;
-}
-@media (min-width: 1024px) {
-  .seo-card-large {
-    grid-column: span 2;
-  }
-}
-
-.seo-card-cta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  grid-column: span 1;
-}
-@media (min-width: 1024px) {
-  .seo-card-cta {
-    grid-column: span 3;
-  }
-}
-
 .seo-card h4 {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   font-size: 18px;
   line-height: 1.4;
 }
+.seo-card h4:not(:first-child) {
+  margin-top: 24px;
+}
 .seo-card p {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   line-height: 1.6;
 }
 .seo-card p:last-child {
   margin-bottom: 0;
 }
 .seo-card ul {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   padding-left: 20px;
   line-height: 1.8;
 }
@@ -183,6 +160,10 @@ body::after {
 }
 .seo-card li {
   margin-bottom: 6px;
+}
+.seo-card .btn {
+  margin-top: auto;
+  align-self: flex-start;
 }
 
 /* Hero */
