@@ -963,8 +963,11 @@ select:hover {
   border-radius: var(--radius);
   padding: 2rem;
   max-width: 500px;
+  max-height: 90vh;
   width: 90%;
   box-shadow: var(--shadow-glow);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .paypal-popup-close {
