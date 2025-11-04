@@ -53,7 +53,7 @@
     imageBitmap: null,
     previewCanvas: null,
     previewCtx: null,
-    pixelResolution: 32,
+    pixelResolution: 104,
     paletteSize: 16,
     dithering: 'none',
     brightness: 0,
