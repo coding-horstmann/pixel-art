@@ -106,31 +106,83 @@ body::after {
 .upload-section.section { padding-bottom: 24px; }
 .section-title { font-family: "Press Start 2P", system-ui; font-size: 18px; margin: 0 0 24px; }
 
-/* SEO Content Grid - Two columns on desktop */
-.seo-content-grid {
+/* SEO Cards Grid - Card-based layout */
+.seo-cards-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
+  gap: 20px;
 }
-@media (min-width: 1024px) {
-  .seo-content-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
+@media (min-width: 768px) {
+  .seo-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 }
-.seo-column h4 {
-  margin-top: 24px;
-  margin-bottom: 12px;
+@media (min-width: 1024px) {
+  .seo-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
 }
-.seo-column h4:first-of-type {
-  margin-top: 0;
+
+.seo-card {
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
-.seo-column p,
-.seo-column ul {
-  margin-bottom: 16px;
+.seo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 255, 255, .15), 0 0 24px rgba(255, 20, 147, .1);
+  border-color: rgba(255, 255, 255, .15);
 }
-.seo-column ul {
+
+.seo-card-large {
+  grid-column: span 1;
+}
+@media (min-width: 1024px) {
+  .seo-card-large {
+    grid-column: span 2;
+  }
+}
+
+.seo-card-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  grid-column: span 1;
+}
+@media (min-width: 1024px) {
+  .seo-card-cta {
+    grid-column: span 3;
+  }
+}
+
+.seo-card h4 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+.seo-card p {
+  margin: 0 0 12px;
+  line-height: 1.6;
+}
+.seo-card p:last-child {
+  margin-bottom: 0;
+}
+.seo-card ul {
+  margin: 0 0 12px;
   padding-left: 20px;
+  line-height: 1.8;
+}
+.seo-card ul:last-child {
+  margin-bottom: 0;
+}
+.seo-card li {
+  margin-bottom: 6px;
 }
 
 /* Hero */
