@@ -73,6 +73,21 @@ body::after {
 }
 .skip-link:focus { left: 16px; top: 8px; background: #000; color: #fff; padding: 8px 12px; }
 
+/* Ankündigungsleiste */
+.announcement-bar {
+  background: rgba(0, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+  padding: 8px 0;
+  text-align: center;
+}
+.announcement-text {
+  margin: 0;
+  color: #00FFFF;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
 .container { width: min(1200px, 92%); margin: 0 auto; }
 
 .site-header {
