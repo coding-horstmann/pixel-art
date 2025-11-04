@@ -268,7 +268,7 @@ function generateCustomerEmailHTML({ customerData, orderData, cart, totalAmount,
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 20, 147, 0.2) 100%), #0A0A23; padding: 40px 30px; text-align: center;">
-              <img src="https://pixel-poster.com/android-chrome-192x192.png" alt="${shopName}" style="width: 64px; height: 64px; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;">
+              <div style="font-size: 48px; margin-bottom: 12px; color: #00FFFF; text-shadow: 0 0 12px rgba(0, 255, 255, 0.6); line-height: 1;">▦</div>
               <h1 style="margin: 0; color: #00FFFF; font-size: 28px; text-shadow: 0 0 12px rgba(0, 255, 255, 0.6);">${shopName}</h1>
               <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 16px; opacity: 0.9;">Deine Bestellung ist eingegangen!</p>
             </td>
