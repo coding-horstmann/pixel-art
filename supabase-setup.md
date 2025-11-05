@@ -129,6 +129,10 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 -- ============================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================
+-- 
+-- WICHTIG: Die folgenden Policies sind sicherer als die Standard-Policies.
+-- Sie erlauben INSERT (für Checkout), blockieren aber SELECT/UPDATE/DELETE.
+-- Nur Service Role kann Daten lesen (für serverseitige Admin-Funktionen).
 
 -- RLS aktivieren (Sicherheit!)
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
@@ -136,22 +140,33 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Jeder kann Kunden anlegen (für Checkout)
-CREATE POLICY "Anyone can insert customers" 
+CREATE POLICY "Allow insert customers for checkout"
   ON customers FOR INSERT 
   WITH CHECK (true);
 
 -- Policy: Jeder kann Bestellungen anlegen (für Checkout)
-CREATE POLICY "Anyone can insert orders" 
+CREATE POLICY "Allow insert orders for checkout"
   ON orders FOR INSERT 
   WITH CHECK (true);
 
 -- Policy: Jeder kann Order Items anlegen (für Checkout)
-CREATE POLICY "Anyone can insert order_items" 
+-- Prüft dass die order_id existiert
+CREATE POLICY "Allow insert order_items for checkout"
   ON order_items FOR INSERT 
-  WITH CHECK (true);
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM orders 
+      WHERE orders.id = order_items.order_id
+    )
+  );
 
--- Policy: Nur Service Role kann alles lesen (für Admin-Dashboard später)
--- (Hinweis: Du kannst später eine Admin-Policy mit authenticated users hinzufügen)
+-- SELECT/UPDATE/DELETE: Standard blockiert (keine Policies = blockiert)
+-- Nur Service Role (mit service_role key) kann Daten lesen/schreiben
+-- Dies schützt vor ungeschütztem Zugriff auf Bestellungen/Kundendaten
+
+-- HINWEIS: Für Admin-Dashboard später:
+-- Erstelle serverseitige API-Endpoints (Vercel Serverless Functions)
+-- die SERVICE_ROLE_KEY verwenden und Authentifizierung implementieren
 
 -- ============================================
 -- VIEWS (Optional - für einfache Abfragen)
@@ -233,17 +248,18 @@ Jetzt erstellen wir einen Bucket für die Poster-Bilder:
 
 Damit deine App Bilder hochladen kann:
 
+**Option 1: Manuell in Supabase UI**
+
 1. Klicke auf den `poster-images` Bucket
 2. Gehe zu **Policies**
 3. Klicke auf **New Policy**
 4. Wähle **Custom policy**
-5. **Policy name:** `Allow public upload`
+5. **Policy name:** `Allow upload to poster-images`
 6. **Allowed operation:** INSERT
 7. **Policy definition:**
 
 ```sql
--- Erlaube jedem das Hochladen von Bildern
-CREATE POLICY "Allow public upload"
+CREATE POLICY "Allow upload to poster-images"
 ON storage.objects FOR INSERT
 WITH CHECK (bucket_id = 'poster-images');
 ```
@@ -252,14 +268,19 @@ WITH CHECK (bucket_id = 'poster-images');
 
 9. Erstelle eine zweite Policy für **SELECT** (damit Bilder gelesen werden können):
 
-**Policy name:** `Allow public read`
+**Policy name:** `Allow public read poster-images`
 **Allowed operation:** SELECT
 
 ```sql
-CREATE POLICY "Allow public read"
+CREATE POLICY "Allow public read poster-images"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'poster-images');
 ```
+
+**Option 2: Via SQL Editor (empfohlen)**
+
+Führe die kompletten Policies aus der Datei `supabase-rls-policies.sql` aus.
+Diese Datei enthält alle sicheren Policies auf einmal und ersetzt die alten.
 
 ---
 
@@ -283,7 +304,29 @@ Jetzt verbindest du Supabase mit deinem Vercel-Projekt:
 
 ---
 
-## ✅ Schritt 6: Überprüfung
+## ✅ Schritt 6: Sicherheits-Policies anwenden
+
+### WICHTIG: Sichere RLS-Policies anwenden
+
+Nachdem die Tabellen erstellt sind, solltest du die **sicheren RLS-Policies** anwenden:
+
+1. Gehe zu Supabase → **SQL Editor**
+2. Öffne die Datei `supabase-rls-policies.sql` aus diesem Projekt
+3. Kopiere den gesamten Inhalt
+4. Füge ihn in den SQL Editor ein
+5. Klicke auf **Run**
+
+**Was machen diese Policies?**
+- ✅ Erlauben INSERT (für Checkout)
+- ❌ Blockieren SELECT/UPDATE/DELETE für anonyme Nutzer
+- ✅ Nur Service Role kann Daten lesen (für Admin-Dashboard später)
+
+**Warum ist das wichtig?**
+Ohne diese Policies könnte jeder mit der ANON_KEY alle Bestellungen und Kundendaten lesen!
+
+---
+
+## ✅ Schritt 7: Überprüfung
 
 ### Teste ob alles funktioniert:
 
@@ -296,20 +339,36 @@ Jetzt verbindest du Supabase mit deinem Vercel-Projekt:
 3. Gehe zu **Storage**
 4. Du solltest den Bucket `poster-images` sehen
 
+5. **Teste die Policies:**
+   - Versuche eine Test-Zeile in `customers` einzufügen (sollte funktionieren)
+   - Versuche Daten zu lesen (sollte mit ANON_KEY **FEHLERN** - das ist korrekt!)
+
 ### Wenn du alles siehst: **PERFEKT!** 🎉
 
 ---
 
 ## 📝 Nächste Schritte
 
-Jetzt wo Supabase eingerichtet ist, integriere ich den JavaScript-Code:
+Jetzt wo Supabase eingerichtet ist, ist der JavaScript-Code bereits integriert:
 
 1. ✅ Supabase Client einrichten (`supabase-client.js`)
 2. ✅ Code zum Speichern von Bestellungen nach erfolgreicher PayPal-Zahlung
 3. ✅ Code zum Hochladen von Poster-Bildern in Storage
-4. ✅ Testen!
+4. ✅ Sicherheits-Policies aktiviert (verhindert ungeschützten Zugriff)
 
-**Bereit für die Code-Integration? Sag Bescheid wenn Supabase fertig eingerichtet ist!** 🚀
+**Die App funktioniert jetzt sicher!** 🚀
+
+### Hinweis zu Admin-Funktionen
+
+Die Funktionen `getAllOrders()` und `getOrder()` wurden aus Sicherheitsgründen entfernt.
+Für ein Admin-Dashboard später:
+
+1. Erstelle serverseitige API-Endpoints (Vercel Serverless Functions)
+2. Verwende `SERVICE_ROLE_KEY` in diesen Endpoints
+3. Implementiere Authentifizierung (z.B. Supabase Auth oder API Keys)
+4. Beispiel: `/api/admin/orders` (GET) für Bestellungen-Liste
+
+Siehe `supabase-rls-policies.sql` für weitere Details.
 
 ---
 

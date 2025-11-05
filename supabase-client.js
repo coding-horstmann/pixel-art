@@ -270,82 +270,13 @@
     }
   }
 
-  /**
-   * Holt eine Bestellung aus Supabase
-   * @param {string} orderId - Order UUID
-   * @returns {Promise<Object>} - Bestellung mit Items und Kunde
-   */
-  async function getOrder(orderId) {
-    if (!supabaseClient) {
-      throw new Error('Supabase Client nicht initialisiert');
-    }
-
-    try {
-      // Hole Bestellung mit Kunde (via Join)
-      const { data: order, error: orderError } = await supabaseClient
-        .from('orders')
-        .select(`
-          *,
-          customer:customers(*),
-          items:order_items(*)
-        `)
-        .eq('id', orderId)
-        .single();
-
-      if (orderError) {
-        console.error('❌ Fehler beim Laden der Bestellung:', orderError);
-        throw orderError;
-      }
-
-      return order;
-
-    } catch (error) {
-      console.error('❌ Fehler beim Laden der Bestellung:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Holt alle Bestellungen (für Admin-Dashboard später)
-   * @param {number} limit - Anzahl der Bestellungen
-   * @param {number} offset - Offset für Pagination
-   * @returns {Promise<Array>} - Array von Bestellungen
-   */
-  async function getAllOrders(limit = 50, offset = 0) {
-    if (!supabaseClient) {
-      throw new Error('Supabase Client nicht initialisiert');
-    }
-
-    try {
-      const { data: orders, error } = await supabaseClient
-        .from('orders')
-        .select(`
-          *,
-          customer:customers(*),
-          items:order_items(*)
-        `)
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-
-      if (error) {
-        console.error('❌ Fehler beim Laden der Bestellungen:', error);
-        throw error;
-      }
-
-      return orders;
-
-    } catch (error) {
-      console.error('❌ Fehler beim Laden der Bestellungen:', error);
-      throw error;
-    }
-  }
-
   // Exportiere Funktionen global
+  // WICHTIG: getOrder() und getAllOrders() wurden entfernt aus Sicherheitsgründen
+  // Diese Funktionen ermöglichten ungeschützten Zugriff auf alle Bestellungen/Kundendaten
+  // Für Admin-Dashboard später: Serverseitige API-Endpoints mit Authentifizierung implementieren
   window.SupabaseClient = {
     init: initSupabaseClient,
     saveOrder,
-    getOrder,
-    getAllOrders,
     uploadPosterImage
   };
 
