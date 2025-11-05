@@ -367,7 +367,6 @@
       state.price = sizes[0].price;
       sizeSelect.value = state.selectedSize;
       sizePrice.textContent = `€${state.price.toFixed(2)}`;
-      dispatchOrderUpdated();
     }
 
     sizeSelect?.addEventListener('change', () => {
@@ -375,7 +374,6 @@
       state.selectedSize = sel.value;
       state.price = Number(sel.dataset.price);
       sizePrice.textContent = `€${state.price.toFixed(2)}`;
-      dispatchOrderUpdated();
     });
 
     function openModal() {
@@ -392,7 +390,6 @@
       if (mPrice) mPrice.textContent = `€${total.toFixed(2)}`;
       // Render cart items
       renderCartItems();
-      dispatchOrderUpdated();
     }
 
     function renderCartItems() {
@@ -689,9 +686,6 @@
       openModal();
     });
 
-    function dispatchOrderUpdated() {
-      window.dispatchEvent(new CustomEvent('order:updated', { detail: { size: state.selectedSize, orientation: state.orientation, price: state.price } }));
-    }
 
     // Event-Listener für erfolgreiche Zahlungen
     window.addEventListener('payment:success', (e) => {
@@ -1167,7 +1161,6 @@
     }
   }
 
-  function initSizesPricing() { /* sizes handled via dropdown in upload section */ }
 
   let isInitialized = false;
 
@@ -1194,7 +1187,6 @@
     initFooterYear();
     initUpload();
     initControls();
-    initSizesPricing();
     // Render inspiration demo canvases with a simple pattern
     const cards = document.querySelectorAll('.inspo-card');
     cards.forEach((c, idx) => {

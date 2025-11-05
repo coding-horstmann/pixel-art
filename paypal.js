@@ -5,7 +5,6 @@
 
 (() => {
   let paypalLoaded = false;
-  let paypalButtonsRendered = false;
 
   // Hilfsfunktion: Warte auf PayPal SDK
   function waitForPayPal() {
@@ -290,17 +289,6 @@
 
           // custom_id darf nur 127 Zeichen sein - speichere nur essenzielle Info
           const orderId = `ORDER-${Date.now()}`;
-          
-          // Speichere Bestelldaten temporär im Window für Phase 2 (Supabase)
-          window.currentOrderData = {
-            orderId: orderId,
-            timestamp: Date.now(),
-            itemCount: cart.length,
-            customer: customerData,
-            paymentMethod: paymentMethod,
-            cart: cart,
-            recaptchaToken: window.currentRecaptchaToken // reCAPTCHA-Token hinzufügen
-          };
           
         return actions.order.create({
           purchase_units: [{
