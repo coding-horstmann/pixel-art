@@ -3,10 +3,339 @@
  * Sendet Bestellbestätigung an Kunde und Shop-Betreiber via Brevo
  */
 
+const { validatePrices } = require('./validate-order');
+
+// Rate-Limiting: In-Memory Store für IP → Request-Zähler mit Timestamps
+const rateLimitStore = new Map();
+const RATE_LIMIT_MAX_REQUESTS = 10; // Max. 10 Anfragen
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // Pro Minute (60 Sekunden)
+
+/**
+ * Prüft Rate-Limit für eine IP-Adresse
+ * @param {string} ip - IP-Adresse
+ * @returns {{ allowed: boolean, retryAfter?: number }} - allowed: true wenn erlaubt, retryAfter: Sekunden bis nächster Request erlaubt
+ */
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const record = rateLimitStore.get(ip);
+
+  if (!record) {
+    // Erste Anfrage dieser IP
+    rateLimitStore.set(ip, {
+      count: 1,
+      firstRequest: now,
+      requests: [now]
+    });
+    return { allowed: true };
+  }
+
+  // Entferne alte Requests außerhalb des Zeitfensters
+  record.requests = record.requests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW_MS);
+  record.count = record.requests.length;
+
+  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+    // Rate Limit überschritten
+    const oldestRequest = Math.min(...record.requests);
+    const retryAfter = Math.ceil((RATE_LIMIT_WINDOW_MS - (now - oldestRequest)) / 1000);
+    return { allowed: false, retryAfter };
+  }
+
+  // Request hinzufügen
+  record.requests.push(now);
+  record.count = record.requests.length;
+  rateLimitStore.set(ip, record);
+
+  return { allowed: true };
+}
+
+/**
+ * Entfernt alte Rate-Limit-Einträge (Cleanup)
+ */
+function cleanupRateLimitStore() {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitStore.entries()) {
+    // Entferne Einträge, die älter als 2 Minuten sind (doppeltes Zeitfenster)
+    if (now - record.firstRequest > RATE_LIMIT_WINDOW_MS * 2) {
+      rateLimitStore.delete(ip);
+    }
+  }
+}
+
+// Cleanup alle 2 Minuten
+setInterval(cleanupRateLimitStore, 2 * 60 * 1000);
+
+/**
+ * Extrahiert IP-Adresse aus Request-Headern (Vercel-kompatibel)
+ * @param {Object} req - Request-Objekt
+ * @returns {string} IP-Adresse
+ */
+function getClientIP(req) {
+  // Vercel setzt x-forwarded-for mit mehreren IPs (Client, Proxy, ...)
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    // Nimm die erste IP (ursprünglicher Client)
+    return forwarded.split(',')[0].trim();
+  }
+  
+  // Fallback: x-real-ip (manche Proxies)
+  if (req.headers['x-real-ip']) {
+    return req.headers['x-real-ip'];
+  }
+  
+  // Fallback: req.connection.remoteAddress (direkte Verbindung)
+  return req.connection?.remoteAddress || 'unknown';
+}
+
+/**
+ * Validiert alle Eingabedaten einer Bestellung
+ * @param {Object} data - { customerData, cart, orderImages, orderData }
+ * @returns {{ valid: boolean, errors: Array<string> }}
+ */
+function validateOrderInput(data) {
+  const errors = [];
+  const { customerData, cart, orderImages, orderData } = data;
+
+  // customerData-Validierung
+  if (!customerData || typeof customerData !== 'object') {
+    errors.push('Kundendaten fehlen oder sind ungültig');
+  } else {
+    // vorname
+    if (!customerData.vorname || typeof customerData.vorname !== 'string') {
+      errors.push('Vorname fehlt oder ist ungültig');
+    } else {
+      const vorname = customerData.vorname.trim();
+      if (vorname.length < 1 || vorname.length > 100) {
+        errors.push('Vorname muss zwischen 1 und 100 Zeichen lang sein');
+      } else if (!/^[a-zA-ZäöüÄÖÜß\s\-']+$/u.test(vorname)) {
+        errors.push('Vorname enthält ungültige Zeichen');
+      }
+    }
+
+    // nachname
+    if (!customerData.nachname || typeof customerData.nachname !== 'string') {
+      errors.push('Nachname fehlt oder ist ungültig');
+    } else {
+      const nachname = customerData.nachname.trim();
+      if (nachname.length < 1 || nachname.length > 100) {
+        errors.push('Nachname muss zwischen 1 und 100 Zeichen lang sein');
+      } else if (!/^[a-zA-ZäöüÄÖÜß\s\-']+$/u.test(nachname)) {
+        errors.push('Nachname enthält ungültige Zeichen');
+      }
+    }
+
+    // email
+    if (!customerData.email || typeof customerData.email !== 'string') {
+      errors.push('E-Mail fehlt oder ist ungültig');
+    } else {
+      const email = customerData.email.trim();
+      if (email.length > 255) {
+        errors.push('E-Mail ist zu lang (max. 255 Zeichen)');
+      } else {
+        // RFC-konforme E-Mail-Validierung (vereinfacht)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          errors.push('E-Mail-Format ist ungültig');
+        }
+      }
+    }
+
+    // telefon (optional)
+    if (customerData.telefon && typeof customerData.telefon === 'string') {
+      const telefon = customerData.telefon.trim();
+      if (telefon.length > 50) {
+        errors.push('Telefonnummer ist zu lang (max. 50 Zeichen)');
+      } else if (!/^[\d\s\+\-\(\)]+$/.test(telefon)) {
+        errors.push('Telefonnummer enthält ungültige Zeichen');
+      }
+    }
+
+    // strasse
+    if (!customerData.strasse || typeof customerData.strasse !== 'string') {
+      errors.push('Straße fehlt oder ist ungültig');
+    } else {
+      const strasse = customerData.strasse.trim();
+      if (strasse.length < 1 || strasse.length > 200) {
+        errors.push('Straße muss zwischen 1 und 200 Zeichen lang sein');
+      }
+    }
+
+    // hausnummer
+    if (!customerData.hausnummer || typeof customerData.hausnummer !== 'string') {
+      errors.push('Hausnummer fehlt oder ist ungültig');
+    } else {
+      const hausnummer = customerData.hausnummer.trim();
+      if (hausnummer.length < 1 || hausnummer.length > 20) {
+        errors.push('Hausnummer muss zwischen 1 und 20 Zeichen lang sein');
+      }
+    }
+
+    // plz
+    if (!customerData.plz || typeof customerData.plz !== 'string') {
+      errors.push('PLZ fehlt oder ist ungültig');
+    } else {
+      const plz = customerData.plz.trim();
+      if (plz.length !== 5 || !/^\d{5}$/.test(plz)) {
+        errors.push('PLZ muss genau 5 Ziffern lang sein');
+      }
+    }
+
+    // ort
+    if (!customerData.ort || typeof customerData.ort !== 'string') {
+      errors.push('Ort fehlt oder ist ungültig');
+    } else {
+      const ort = customerData.ort.trim();
+      if (ort.length < 1 || ort.length > 100) {
+        errors.push('Ort muss zwischen 1 und 100 Zeichen lang sein');
+      }
+    }
+
+    // land (optional, Standard: Deutschland)
+    if (customerData.land && typeof customerData.land !== 'string') {
+      errors.push('Land ist ungültig');
+    }
+  }
+
+  // cart-Validierung
+  if (!Array.isArray(cart) || cart.length === 0) {
+    errors.push('Warenkorb ist leer oder ungültig');
+  } else {
+    if (cart.length > 20) {
+      errors.push('Zu viele Artikel im Warenkorb (max. 20)');
+    }
+
+    cart.forEach((item, index) => {
+      if (!item || typeof item !== 'object') {
+        errors.push(`Artikel ${index + 1}: Ungültiges Item-Objekt`);
+        return;
+      }
+
+      // size
+      if (!item.size || typeof item.size !== 'string') {
+        errors.push(`Artikel ${index + 1}: Größe fehlt oder ist ungültig`);
+      }
+
+      // price
+      if (typeof item.price !== 'number' || isNaN(item.price) || item.price <= 0) {
+        errors.push(`Artikel ${index + 1}: Preis fehlt oder ist ungültig`);
+      }
+
+      // orientation
+      if (item.orientation && item.orientation !== 'portrait' && item.orientation !== 'landscape') {
+        errors.push(`Artikel ${index + 1}: Ungültige Ausrichtung (muss "portrait" oder "landscape" sein)`);
+      }
+
+      // imageDataUrl (muss vorhanden sein für Email-Versand)
+      if (!item.imageDataUrl || typeof item.imageDataUrl !== 'string') {
+        errors.push(`Artikel ${index + 1}: Bild-URL fehlt`);
+      }
+    });
+  }
+
+  // orderImages-Validierung
+  if (!Array.isArray(orderImages)) {
+    errors.push('Bestellbilder müssen ein Array sein');
+  } else {
+    if (orderImages.length !== cart.length) {
+      errors.push(`Anzahl der Bilder (${orderImages.length}) stimmt nicht mit Anzahl der Artikel (${cart.length}) überein`);
+    }
+
+    let totalImageSize = 0;
+    const maxImageSize = 10 * 1024 * 1024; // 10MB pro Bild (Base64-kodiert)
+    const maxTotalSize = 50 * 1024 * 1024; // 50MB gesamt (Base64-kodiert)
+
+    orderImages.forEach((imageData, index) => {
+      if (typeof imageData !== 'string') {
+        errors.push(`Bild ${index + 1}: Muss ein String sein`);
+        return;
+      }
+
+      // Prüfe Format
+      if (!imageData.startsWith('data:image/png;base64,') && !imageData.startsWith('data:image/jpeg;base64,') && !imageData.startsWith('data:image/jpg;base64,')) {
+        errors.push(`Bild ${index + 1}: Ungültiges Format (muss PNG oder JPEG sein)`);
+        return;
+      }
+
+      // Prüfe Größe
+      const base64Content = imageData.split(',')[1] || '';
+      const imageSize = (base64Content.length * 3) / 4; // Base64-Dekodierung: ~75% der ursprünglichen Größe
+      
+      if (imageSize > maxImageSize) {
+        errors.push(`Bild ${index + 1}: Zu groß (max. 10MB, aktuell: ${(imageSize / 1024 / 1024).toFixed(2)}MB)`);
+      }
+
+      totalImageSize += imageSize;
+    });
+
+    if (totalImageSize > maxTotalSize) {
+      errors.push(`Gesamtgröße aller Bilder zu groß (max. 50MB, aktuell: ${(totalImageSize / 1024 / 1024).toFixed(2)}MB)`);
+    }
+  }
+
+  // orderData-Validierung
+  if (!orderData || typeof orderData !== 'object') {
+    errors.push('Bestelldaten fehlen oder sind ungültig');
+  } else {
+    // orderId
+    if (!orderData.orderId || typeof orderData.orderId !== 'string') {
+      errors.push('Bestellnummer fehlt oder ist ungültig');
+    } else {
+      const orderId = orderData.orderId.trim();
+      if (orderId.length < 1 || orderId.length > 200) {
+        errors.push('Bestellnummer muss zwischen 1 und 200 Zeichen lang sein');
+      }
+    }
+
+    // payerId (optional)
+    if (orderData.payerId && typeof orderData.payerId === 'string') {
+      if (orderData.payerId.length > 200) {
+        errors.push('PayPal Payer ID ist zu lang (max. 200 Zeichen)');
+      }
+    }
+
+    // timestamp
+    if (!orderData.timestamp || typeof orderData.timestamp !== 'string') {
+      errors.push('Zeitstempel fehlt oder ist ungültig');
+    } else {
+      // Prüfe ISO-8601 Format
+      const timestamp = new Date(orderData.timestamp);
+      if (isNaN(timestamp.getTime())) {
+        errors.push('Zeitstempel ist kein gültiges ISO-8601 Datum');
+      }
+    }
+
+    // paymentMethod
+    if (orderData.paymentMethod && typeof orderData.paymentMethod === 'string') {
+      const validMethods = ['paypal', 'card', 'sepa'];
+      if (!validMethods.includes(orderData.paymentMethod)) {
+        errors.push(`Ungültige Zahlungsmethode: ${orderData.paymentMethod}`);
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
 export default async function handler(req, res) {
   // Nur POST-Anfragen erlauben
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Rate-Limiting: Prüfe IP-basiertes Limit
+  const clientIP = getClientIP(req);
+  const rateLimitCheck = checkRateLimit(clientIP);
+  
+  if (!rateLimitCheck.allowed) {
+    console.warn(`⚠️ Rate Limit überschritten für IP: ${clientIP}`);
+    res.setHeader('Retry-After', String(rateLimitCheck.retryAfter || 60));
+    return res.status(429).json({
+      error: 'Zu viele Anfragen',
+      message: `Bitte versuche es in ${rateLimitCheck.retryAfter || 60} Sekunden erneut.`,
+      retryAfter: rateLimitCheck.retryAfter
+    });
   }
 
   try {
@@ -18,10 +347,35 @@ export default async function handler(req, res) {
       recaptchaToken // Google reCAPTCHA v3 Token
     } = req.body;
 
-    // Validierung
+    // Grundlegende Validierung
     if (!orderData || !customerData || !cart || cart.length === 0) {
       return res.status(400).json({ error: 'Fehlende Bestelldaten' });
     }
+
+    // Umfassende Input-Validierung
+    const inputValidation = validateOrderInput({ customerData, cart, orderImages, orderData });
+    if (!inputValidation.valid) {
+      console.error('❌ Input-Validierung fehlgeschlagen:', inputValidation.errors);
+      return res.status(400).json({
+        error: 'Input-Validierung fehlgeschlagen',
+        details: inputValidation.errors
+      });
+    }
+    console.log('✅ Input-Validierung erfolgreich');
+
+    // Preis-Validierung (verhindert Preis-Manipulation)
+    const priceValidation = validatePrices(cart);
+    if (!priceValidation.valid) {
+      console.error('❌ Preis-Validierung fehlgeschlagen:', priceValidation.errors);
+      return res.status(400).json({
+        error: 'Preis-Validierung fehlgeschlagen',
+        details: priceValidation.errors
+      });
+    }
+    console.log('✅ Preis-Validierung erfolgreich:', {
+      expectedTotal: priceValidation.expectedTotal,
+      receivedTotal: priceValidation.receivedTotal
+    });
 
     // reCAPTCHA v3 Verifizierung (Bot-Schutz)
     if (recaptchaToken) {

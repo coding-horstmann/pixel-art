@@ -189,21 +189,47 @@
       popup = document.createElement('div');
       popup.id = 'paypal-popup';
       popup.className = 'paypal-popup';
-      popup.innerHTML = `
-        <div class="paypal-popup-overlay"></div>
-        <div class="paypal-popup-content">
-          <button class="paypal-popup-close" aria-label="Schließen">✕</button>
-          <h3 class="paypal-popup-title">Zahlung abschließen</h3>
-          <p class="paypal-popup-text">Bitte klicke auf den Button unten, um deine Zahlung abzuschließen.</p>
-          <div id="paypal-popup-button-container"></div>
-        </div>
-      `;
+      
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'paypal-popup-overlay';
+      
+      // Create content container
+      const content = document.createElement('div');
+      content.className = 'paypal-popup-content';
+      
+      // Create close button
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'paypal-popup-close';
+      closeBtn.setAttribute('aria-label', 'Schließen');
+      closeBtn.textContent = '✕';
+      
+      // Create title
+      const title = document.createElement('h3');
+      title.className = 'paypal-popup-title';
+      title.textContent = 'Zahlung abschließen';
+      
+      // Create text
+      const text = document.createElement('p');
+      text.className = 'paypal-popup-text';
+      text.textContent = 'Bitte klicke auf den Button unten, um deine Zahlung abzuschließen.';
+      
+      // Create button container
+      const buttonContainer = document.createElement('div');
+      buttonContainer.id = 'paypal-popup-button-container';
+      
+      // Assemble structure
+      content.appendChild(closeBtn);
+      content.appendChild(title);
+      content.appendChild(text);
+      content.appendChild(buttonContainer);
+      
+      popup.appendChild(overlay);
+      popup.appendChild(content);
+      
       document.body.appendChild(popup);
 
       // Close Handler
-      const closeBtn = popup.querySelector('.paypal-popup-close');
-      const overlay = popup.querySelector('.paypal-popup-overlay');
-      
       const closePopup = () => {
         popup.classList.remove('is-open');
       };

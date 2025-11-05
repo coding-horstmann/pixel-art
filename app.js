@@ -10,14 +10,26 @@
       existingToast.remove();
     }
 
-    // Create toast element
+    // Create toast element using safe DOM methods
     const toast = document.createElement('div');
     toast.className = 'toast-notification';
-    toast.innerHTML = `
-      <div class="toast-icon">${icon}</div>
-      <div class="toast-message">${message}</div>
-      <button class="toast-close" aria-label="Schließen">✕</button>
-    `;
+    
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'toast-icon';
+    iconDiv.textContent = icon;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'toast-message';
+    messageDiv.textContent = message;
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'toast-close';
+    closeBtn.setAttribute('aria-label', 'Schließen');
+    closeBtn.textContent = '✕';
+    
+    toast.appendChild(iconDiv);
+    toast.appendChild(messageDiv);
+    toast.appendChild(closeBtn);
 
     // Add to body
     document.body.appendChild(toast);
@@ -30,7 +42,6 @@
     });
 
     // Close button handler
-    const closeBtn = toast.querySelector('.toast-close');
     closeBtn.addEventListener('click', () => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 400);
@@ -399,7 +410,10 @@
       cartContainer.innerHTML = '';
       const modalForm = document.getElementById('modalForm');
       if (state.cart.length === 0) {
-        cartContainer.innerHTML = '<p class="cart-empty">Ihr Warenkorb ist leer. Bitte erstellen Sie zuerst ein Pixel-Art Poster.</p>';
+        const emptyMsg = document.createElement('p');
+        emptyMsg.className = 'cart-empty';
+        emptyMsg.textContent = 'Ihr Warenkorb ist leer. Bitte erstellen Sie zuerst ein Pixel-Art Poster.';
+        cartContainer.appendChild(emptyMsg);
         // Hide form when cart is empty
         if (modalForm) modalForm.style.display = 'none';
         return;
@@ -408,30 +422,75 @@
       if (modalForm) modalForm.style.display = 'block';
       // Calculate total
       const total = state.cart.reduce((sum, item) => sum + item.price, 0);
-      // Add title and items
-      const titleHTML = `<h4 class="cart-title">Ihre Poster (${state.cart.length})</h4>`;
-      const itemsHTML = state.cart.map((item, index) => {
-        return `
-          <div class="cart-item">
-            <img src="${item.imageDataUrl}" alt="Poster ${index + 1}" class="cart-item-image">
-            <div class="cart-item-info">
-              <div class="cart-item-size">${item.size}</div>
-              <div class="cart-item-orientation">${item.orientation === 'portrait' ? 'Hochformat' : 'Querformat'}</div>
-              <div class="cart-item-price">€${item.price.toFixed(2)}</div>
-            </div>
-            <button class="cart-item-remove" data-index="${index}" type="button" aria-label="Entfernen">✕</button>
-          </div>
-        `;
-      }).join('');
-      const totalHTML = `<div class="cart-total"><span>Gesamtsumme:</span> <strong>€${total.toFixed(2)}</strong></div>`;
-      cartContainer.innerHTML = titleHTML + itemsHTML + totalHTML;
-      // Add event listeners for remove buttons
-      cartContainer.querySelectorAll('.cart-item-remove').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = parseInt(e.target.dataset.index, 10);
-          removeCartItem(index);
+      
+      // Add title
+      const title = document.createElement('h4');
+      title.className = 'cart-title';
+      title.textContent = `Ihre Poster (${state.cart.length})`;
+      cartContainer.appendChild(title);
+      
+      // Add items using safe DOM methods
+      state.cart.forEach((item, index) => {
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        
+        const img = document.createElement('img');
+        img.src = item.imageDataUrl; // Safe: browser escapes URLs automatically
+        img.alt = `Poster ${index + 1}`;
+        img.className = 'cart-item-image';
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'cart-item-info';
+        
+        const sizeDiv = document.createElement('div');
+        sizeDiv.className = 'cart-item-size';
+        sizeDiv.textContent = item.size;
+        
+        const orientationDiv = document.createElement('div');
+        orientationDiv.className = 'cart-item-orientation';
+        orientationDiv.textContent = item.orientation === 'portrait' ? 'Hochformat' : 'Querformat';
+        
+        const priceDiv = document.createElement('div');
+        priceDiv.className = 'cart-item-price';
+        priceDiv.textContent = `€${item.price.toFixed(2)}`;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'cart-item-remove';
+        removeBtn.setAttribute('data-index', String(index));
+        removeBtn.setAttribute('type', 'button');
+        removeBtn.setAttribute('aria-label', 'Entfernen');
+        removeBtn.textContent = '✕';
+        removeBtn.addEventListener('click', (e) => {
+          const idx = parseInt(e.target.dataset.index, 10);
+          removeCartItem(idx);
         });
+        
+        infoDiv.appendChild(sizeDiv);
+        infoDiv.appendChild(orientationDiv);
+        infoDiv.appendChild(priceDiv);
+        
+        cartItem.appendChild(img);
+        cartItem.appendChild(infoDiv);
+        cartItem.appendChild(removeBtn);
+        
+        cartContainer.appendChild(cartItem);
       });
+      
+      // Add total
+      const totalDiv = document.createElement('div');
+      totalDiv.className = 'cart-total';
+      
+      const totalLabel = document.createElement('span');
+      totalLabel.textContent = 'Gesamtsumme:';
+      
+      const totalStrong = document.createElement('strong');
+      totalStrong.textContent = `€${total.toFixed(2)}`;
+      
+      totalDiv.appendChild(totalLabel);
+      totalDiv.appendChild(document.createTextNode(' '));
+      totalDiv.appendChild(totalStrong);
+      
+      cartContainer.appendChild(totalDiv);
     }
 
     function removeCartItem(index) {
