@@ -580,10 +580,10 @@
     </div>
     <header class="site-header">
         <div class="container header-inner">
-            <div class="brand">
+            <a href="#main" class="brand" aria-label="Zur Startseite">
                 <img src="./assets/logo/logo.svg" alt="Pixel-Poster Logo" class="logo-img" width="40" height="40">
                 <h1 class="brand-title">Pixel-Poster</h1>
-            </div>
+            </a>
             <nav class="site-nav" aria-label="Primary">
                 <a href="#upload" class="nav-link">Pixel Art Generator</a>
                 <a href="#inspiration" class="nav-link">Inspiration</a>
@@ -696,9 +696,9 @@
                             <div class="control-group">
                                 <label for="paletteSize">Color Palette</label>
                                 <select id="paletteSize">
-                                    <option value="4">4 colors (Game Boy)</option>
-                                    <option value="8">8 colors (NES)</option>
-                                    <option value="16" selected>16 colors (SNES)</option>
+                                    <option value="4">4 colors</option>
+                                    <option value="8">8 colors</option>
+                                    <option value="16" selected>16 colors</option>
                                     <option value="32">32 colors</option>
                                     <option value="64">64 colors</option>
                                 </select>
@@ -984,8 +984,10 @@
     <footer class="site-footer">
         <div class="container footer-grid">
             <div class="foot-brand">
-                <img src="./assets/logo/logo.svg" alt="Pixel-Poster Logo" class="logo-img-footer" width="40" height="40">
-                <span class="brand-title">Pixel-Poster</span>
+                <a href="#main" class="foot-brand-link" aria-label="Zur Startseite">
+                    <img src="./assets/logo/logo.svg" alt="Pixel-Poster Logo" class="logo-img-footer" width="40" height="40">
+                    <span class="brand-title">Pixel-Poster</span>
+                </a>
                 <span class="brand-tagline">Verwandle deine Fotos in Retro-Kunstwerke</span>
                 <div class="foot-contact">
                     <a href="mailto:hello@pixel-poster.com" class="foot-link">hello@pixel-poster.com</a>
