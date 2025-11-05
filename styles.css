@@ -218,8 +218,8 @@ body::after {
 /* Big upload CTA */
 .btn-upload { width: 100%; max-width: 320px; font-size: 16px; padding: 14px 18px; border-width: 2px; }
 
-.hero-visual { position: relative; }
-.hero-image { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--radius); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 4px 24px rgba(0,0,0,.4); }
+.hero-visual { position: relative; z-index: 2; }
+.hero-image { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--radius); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 4px 24px rgba(0,0,0,.4); position: relative; z-index: 1; }
 .pixel-glow { position: absolute; inset: 0; pointer-events: none; filter: blur(16px); opacity: .4; }
 
 /* Features */
