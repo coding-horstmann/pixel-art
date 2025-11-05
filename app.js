@@ -1158,11 +1158,26 @@
     console.log('✓ App-Initialisierung abgeschlossen!');
   }
 
+  // Home-Button: Scrollt ganz nach oben
+  function initHomeButtons() {
+    const homeButtons = document.querySelectorAll('.brand, .foot-brand-link');
+    homeButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  }
+
   // Use 'interactive' or 'complete' as readyState check, then wait for all scripts
   if (document.readyState === 'complete') {
     init();
+    initHomeButtons();
   } else {
-    window.addEventListener('load', init);
+    window.addEventListener('load', () => {
+      init();
+      initHomeButtons();
+    });
   }
 })();
 
