@@ -810,8 +810,8 @@ select:hover {
 .payments-strip { padding: 24px 0; }
 .payments-row { display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; opacity: .9; }
 .pay-icon { height: 28px; filter: drop-shadow(0 0 6px rgba(0,255,255,.2)); }
-.inspo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.inspo-card { width: 100%; height: auto; aspect-ratio: 5 / 7; object-fit: cover; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); image-rendering: pixelated; box-shadow: 0 4px 12px rgba(0,0,0,.25); display: block; }
+.inspo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; position: relative; z-index: 2; }
+.inspo-card { width: 100%; height: auto; aspect-ratio: 5 / 7; object-fit: cover; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); image-rendering: pixelated; box-shadow: 0 4px 12px rgba(0,0,0,.25); display: block; position: relative; z-index: 1; }
 .inspiration-section .subtext { color: var(--color-muted); margin: 0 0 16px; }
 .faq details { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; }
 .faq summary { cursor: pointer; font-weight: 700; }
