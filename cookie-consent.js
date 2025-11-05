@@ -255,7 +255,6 @@
     hideBanner();
     hideSettingsModal();
     loadScripts();
-    showConsentFeedback('Alle Cookies wurden akzeptiert');
   }
 
   // Akzeptiere nur notwendige Cookies
