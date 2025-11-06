@@ -1209,6 +1209,58 @@
     console.log('✓ App-Initialisierung abgeschlossen!');
   }
 
+  // Mobile Menu Toggle
+  function initMobileMenu() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileNavClose = document.getElementById('mobileNavClose');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    
+    if (!mobileMenuBtn || !mobileNav) return;
+    
+    function openMobileMenu() {
+      mobileNav.classList.add('is-open');
+      mobileMenuBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden'; // Prevent body scroll when menu is open
+    }
+    
+    function closeMobileMenu() {
+      mobileNav.classList.remove('is-open');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = ''; // Restore body scroll
+    }
+    
+    // Open menu
+    mobileMenuBtn.addEventListener('click', openMobileMenu);
+    
+    // Close menu
+    if (mobileNavClose) {
+      mobileNavClose.addEventListener('click', closeMobileMenu);
+    }
+    
+    // Close menu when clicking on links
+    mobileNavLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        // Small delay to allow navigation
+        setTimeout(closeMobileMenu, 100);
+      });
+    });
+    
+    // Close menu when clicking outside (on overlay)
+    mobileNav.addEventListener('click', (e) => {
+      if (e.target === mobileNav) {
+        closeMobileMenu();
+      }
+    });
+    
+    // Close menu on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileNav.classList.contains('is-open')) {
+        closeMobileMenu();
+      }
+    });
+  }
+
   // Home-Button: Scrollt ganz nach oben
   function initHomeButtons() {
     const homeButtons = document.querySelectorAll('.brand, .foot-brand-link');
@@ -1224,10 +1276,12 @@
   if (document.readyState === 'complete') {
     init();
     initHomeButtons();
+    initMobileMenu();
   } else {
     window.addEventListener('load', () => {
       init();
       initHomeButtons();
+      initMobileMenu();
     });
   }
 })();
